@@ -131,7 +131,28 @@ button.row { cursor: pointer } .row .rank { width: 24px; text-align: center } .r
 .row .emo { font-size: 28px } .grow { flex: 1 }
 .row select { border: 0; background: none; font-weight: 900; text-align: right }
 .row select option { color: #111 }
-.profile { text-align: center } .profile .row { text-align: left } .profile .btn { margin-top: 16px }
+.profile { text-align: center; padding-top: 16px } .profile .row { text-align: left } .profile .btn { margin-top: 16px }
+/* photo-card avatar: big rounded square with a warm studio backdrop, character standing at the bottom edge */
+.pavatar { position: relative; overflow: hidden; height: 240px; display: flex; align-items: flex-end; justify-content: center; border-radius: 32px; background: radial-gradient(circle at 50% 35%, #c98a5a, #7a4a2c 75%); box-shadow: 0 10px 24px rgba(0,0,0,.25) }
+.pavatar span { font-size: 190px; line-height: .85; filter: drop-shadow(0 8px 12px rgba(0,0,0,.35)) }
+.profile h2 { font-size: 24px; margin-top: 14px }
+/* class picker: chunky card like the chips/options; opens an in-app grid of class buttons */
+.picker { position: relative; display: flex; width: 100%; align-items: center; gap: 12px; padding: 10px 14px; text-align: left; background: var(--card); border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 18px; font-size: 22px; color: var(--muted); cursor: pointer }
+.picker:active { transform: translateY(2px); border-bottom-width: 3px; margin-bottom: 2px }
+.picker.open, .picker:focus-visible { border-color: var(--blue-b); outline: 0 }
+.picker .chev { transition: rotate .2s } .picker.open .chev { rotate: 180deg }
+/* dropdown panel floats over the page; the transparent scrim catches outside taps */
+.dd { position: relative; z-index: 3 }
+.dd-scrim { position: fixed; inset: 0; z-index: 0 }
+.dd-menu { position: absolute; z-index: 1; top: calc(100% + 8px); left: 0; right: 0; max-height: 300px; overflow-y: auto; margin: 0; padding: 6px; list-style: none; text-align: left; background: var(--card); border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 18px; box-shadow: 0 12px 28px rgba(0,0,0,.3); animation: drop .15s ease-out }
+.dd-menu button { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 14px; border: 2px solid transparent; border-radius: 12px; background: none; font-size: 16px; text-align: left; cursor: pointer }
+.dd-menu button:hover, .dd-menu button:focus-visible { background: var(--lock); outline: 0 }
+.dd-menu [aria-selected=true] button { background: var(--blue-l); border-color: var(--blue-b); color: var(--blue) }
+.dd-menu .i { font-size: 20px }
+@keyframes drop { from { opacity: 0; translate: 0 -6px } }
+.picker .pic { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; background: var(--blue-l); color: var(--blue); font-size: 26px }
+.picker small { display: block; font-size: 12px; font-weight: 700; color: var(--muted) } .picker b { font-size: 18px; color: var(--text) }
+.profile h2 ~ h2 { font-size: 18px }
 /* profile stat cards: bright card, white title, pill button, big emoji peeking in from the right */
 .pcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0 }
 .pcard { position: relative; overflow: hidden; min-width: 0; padding: 12px 10px 40px; border-radius: 16px; text-align: left; color: #fff; background: radial-gradient(circle at 85% 30%, rgba(255,255,255,.22) 0 30%, transparent 31%), radial-gradient(circle at 10% 110%, rgba(0,0,0,.08) 0 25%, transparent 26%) var(--c) }
@@ -165,7 +186,10 @@ button.row { cursor: pointer } .row .rank { width: 24px; text-align: center } .r
 .zone.bad { color: var(--bad-t) }
 .row .up { color: var(--ok-t); font-weight: 900 } .row .down { color: var(--bad-t); font-weight: 900 }
 /* achievement stickers: no frame, white die-cut edge from stacked drop-shadows, slight tilt */
-.stickers { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; padding: 4px 0 8px }
+/* one row, swipe sideways; bleeds to the screen edge, vertical padding keeps tilted stickers from being clipped */
+.stickers { display: flex; gap: 14px; overflow-x: auto; margin: 0 -16px; padding: 10px 16px 14px; scroll-snap-type: x proximity; scrollbar-width: none }
+.stickers::-webkit-scrollbar { display: none }
+.sticker { flex: none; scroll-snap-align: start }
 .sticker { border: 0; background: none; padding: 4px; cursor: pointer; transition: transform .15s }
 .sticker span { display: block; font-size: 52px; line-height: 1; filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 4px rgba(0,0,0,.3)) }
 .sticker:nth-child(odd) { transform: rotate(-7deg) } .sticker:nth-child(even) { transform: rotate(6deg) }

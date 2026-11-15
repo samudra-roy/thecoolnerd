@@ -38,6 +38,7 @@ export default function App() {
   const [active, setActive] = useState<{ ci: number; step: number; practice?: boolean } | 'daily' | null>(null)
   const [lib, setLib] = useState<{ ci: number; step?: number } | null>(null) // Library drill-down: chapter -> lesson
   const [badgeId, setBadgeId] = useState('') // achievement shown full screen
+  const [pickCls, setPickCls] = useState(false) // profile class list open
   const [celebrate, setCelebrate] = useState(0) // new streak count, shown once after the day's first lesson
   const [page, setPage] = useState<'' | 'streak' | 'hearts'>('') // header stat detail pages
   const [chest, setChest] = useState<'' | 'shut' | 'open'>('') // daily quest reward screen
@@ -143,14 +144,14 @@ export default function App() {
 
   return (
     <div className="app">
-      <header>
+      {tab !== 'profile' && <header>
         <div className="cls">
           <span className="av">🧑‍🚀</span>
           <span><small>Welcome back</small><b>{NAME}</b></span>
         </div>
         <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}><Icon name="flame" className="c-fire" /> {s.streak}</button>
         <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}><Icon name="heart" className="c-heart" /> {s.hearts}</button>
-      </header>
+      </header>}
 
       <main key={tab} className={tab === 'home' ? 'world' : undefined}>
         {tab === 'home' && (
@@ -289,13 +290,26 @@ export default function App() {
 
         {tab === 'profile' && (
           <div className="profile">
-            <div className="huge">🧑‍🚀</div>
+            <div className="pavatar" aria-hidden><span>🧑‍🚀</span></div>
             <h2>{NAME}</h2>
-            <label className="row"><span className="grow">My class</span>
-              <select aria-label="Class" value={s.cls} onChange={(e) => set({ cls: +e.target.value })}>
-                {CLASSES.map((n, i) => <option key={n} value={i}>{n}</option>)}
-              </select>
-            </label>
+            {/* themed dropdown instead of a native <select>: the OS popup can't be coloured */}
+            <div className="dd" onKeyDown={(e) => e.key === 'Escape' && setPickCls(false)}>
+              <button className={`picker ${pickCls ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={pickCls} aria-controls="cls-list" onClick={() => setPickCls(!pickCls)}>
+                <span className="pic"><Icon name="cap" /></span>
+                <span className="grow"><small>My class</small><b>{CLASSES[s.cls]}</b></span>
+                <Icon name="down" className="chev" />
+              </button>
+              {pickCls && <>
+                <div className="dd-scrim" onClick={() => setPickCls(false)} />
+                <ul id="cls-list" className="dd-menu" role="listbox" aria-label="My class" ref={(el) => el?.querySelector<HTMLElement>('[aria-selected=true]')?.scrollIntoView({ block: 'nearest' })}>
+                  {CLASSES.map((n, i) => (
+                    <li key={n} role="option" aria-selected={i === s.cls}>
+                      <button autoFocus={i === s.cls} onClick={() => { set({ cls: i }); setPickCls(false) }}>{n}{i === s.cls && <Icon name="check" />}</button>
+                    </li>
+                  ))}
+                </ul>
+              </>}
+            </div>
             <div className="pcards">
               <div className="pcard fire"><h3>{s.streak}</h3><p>Day streak</p><span><Icon name="flame" /></span></div>
               <div className="pcard zap"><h3>{s.xp}</h3><p>Total XP</p><span><Icon name="bolt" /></span></div>
@@ -309,7 +323,7 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <button className="btn alt" onClick={() => { set({ user: '' }); setTab('home') }}>Sign out</button>
+            <button className="btn red" onClick={() => { set({ user: '' }); setTab('home') }}>Sign out</button>
           </div>
         )}
       </main>

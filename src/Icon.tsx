@@ -21,6 +21,8 @@ const P = {
   next: 'M9 6l6 6-6 6',
   prev: 'M15 6l-6 6 6 6',
   play: 'M8 5v14l11-7z',
+  down: 'M6 9l6 6 6-6',
+  cap: 'M2 9l10-5 10 5-10 5zm4 2v5c3 2 9 2 12 0v-5m4-2v6',
   // lesson node types
   lesson: 'M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5m0-13c2-1.5 5-2 8-1.5v13c-3-.5-6 0-8 1.5m0-13v13',
   practice: 'M4 20l1-4L16 5l3 3L8 19zm10-13 3 3',
