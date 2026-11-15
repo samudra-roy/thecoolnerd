@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { settle, weekKey } from './league'
 import { totalXp, type Best, type Result } from './xp'
 
 export type State = {
@@ -11,11 +12,15 @@ export type State = {
   best: Record<string, Best> // lessonId -> { first-run time XP, best stars }
   hearts: number // stored count; use the live value from useStore
   heartAt: number // when the next regen hour started counting
+  bestStreak: number // longest streak ever, for achievements
+  league: number // tier index into TIERS
+  week: string // Monday of the week weekXp belongs to
+  weekXp: number
 }
 export const MAX_HEARTS = 5
 const HOUR = 36e5
 const KEY = 'thecoolnerd-v1'
-const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0 }
+const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0, bestStreak: 0, league: 0, week: '', weekXp: 0 }
 // 1 heart per hour; the clock only runs while below max
 const regen = (o: State, now: number) => {
   if (o.hearts >= MAX_HEARTS) return { hearts: MAX_HEARTS, heartAt: now }
@@ -27,7 +32,12 @@ export const day = (offset = 0) => new Date(Date.now() - offset * 864e5).toLocal
 
 // Dummy backend: localStorage. Swap load/save for Supabase calls later.
 const load = (): State => {
-  try { return { ...fresh, ...JSON.parse(localStorage.getItem(KEY) || '{}') } } catch { return fresh }
+  let st = fresh
+  try { st = { ...fresh, ...JSON.parse(localStorage.getItem(KEY) || '{}') } } catch { /* use fresh */ }
+  const wk = weekKey()
+  // a new week started: settle last week's league (promote/demote) and reset weekly XP
+  if (st.week !== wk) st = { ...st, league: st.week ? settle(st.week, st.league, st.weekXp) : st.league, week: wk, weekXp: 0 }
+  return st
 }
 
 export function useStore() {
@@ -51,7 +61,7 @@ export function useStore() {
         touched.forEach((k) => (last[k] = day()))
         const done = o.progress ? { ...old.done, [o.progress.key]: Math.max(old.done[o.progress.key] || 0, o.progress.step + 1) } : old.done
         const best = o.id && r.next ? { ...old.best, [o.id]: r.next } : old.best
-        return { ...old, streak, lastDay: day(), done, last, best }
+        return { ...old, streak, lastDay: day(), bestStreak: Math.max(old.bestStreak, streak), done, last, best, weekXp: old.weekXp + r.gained }
       })
     },
   }

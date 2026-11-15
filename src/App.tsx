@@ -4,10 +4,15 @@ import { day, useStore } from './store'
 import { makeLesson, makeMix } from './questions'
 import { dailyResult, lessonResult } from './xp'
 import Lesson from './Lesson'
+import SlideLesson from './SlideLesson'
+import { ACHIEVEMENTS } from './achievements'
+import Splash, { WeekStrip } from './Splash'
+import { DEMOTE, PROMOTE, SIZE, TIERS, board as leagueBoard, daysLeft, weekProgress } from './league'
+import { SLIDE_LESSONS, SLIDE_XP } from './slides'
 
 const COLORS = ['#58cc02', '#1cb0f6', '#ce82ff', '#ff9600', '#ff86d0']
 const OFFSETS = [-30, 20, 50, 10, -40]
-const TABS = [['home', '🏠', 'Home'], ['library', '📚', 'Library'], ['friends', '👫', 'Friends'], ['profile', '🙂', 'Profile']] as const
+const TABS = [['home', '🏠', 'Home'], ['library', '📚', 'Library'], ['league', '🏆', 'League'], ['friends', '👫', 'Friends'], ['profile', '🙂', 'Profile']] as const
 type Tab = (typeof TABS)[number][0]
 // dummy friends; replace with a Supabase query later
 const FRIENDS = [{ name: 'Aarav', e: '🦁', xp: 420, streak: 12 }, { name: 'Diya', e: '🦄', xp: 310, streak: 5 }, { name: 'Kabir', e: '🐼', xp: 150, streak: 2 }]
@@ -27,6 +32,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('home')
   const [active, setActive] = useState<{ ci: number; step: number; practice?: boolean } | 'daily' | null>(null)
   const [lib, setLib] = useState<{ ci: number; step?: number } | null>(null) // Library drill-down: chapter -> lesson
+  const [badgeId, setBadgeId] = useState('') // achievement shown full screen
   const [celebrate, setCelebrate] = useState(0) // new streak count, shown once after the day's first lesson
   const chapters = chaptersFor(s.cls)
   const key = (ci: number) => `${s.subject}:${s.cls}:${ci}`
@@ -53,6 +59,13 @@ export default function App() {
     const idx = Array.from({ length: ci + 1 }, (_, i) => i)
     const review = step === REVIEW
     const id = `${key(ci)}:${step}`
+    const slides = SLIDE_LESSONS[`${chapters[ci].gen}:${step}`]
+    if (slides && !practice) return (
+      <SlideLesson key={id} slides={slides} title={chapters[ci].title} hearts={s.hearts} nextHeartMs={s.nextHeartMs} onWrong={loseHeart} onRefill={refillHearts}
+        award={(c, secs) => lessonResult(c, secs, s.best[id], slides.length * SLIDE_XP)}
+        onExit={() => setActive(null)}
+        onDone={(r) => { finish([key(ci)], r, { id, progress: { key: key(ci), step } }); finished() }} />
+    )
     return <Lesson key={`${ci}:${step}`} hearts={s.hearts} nextHeartMs={s.nextHeartMs} onWrong={loseHeart} onRefill={refillHearts} title={chapters[ci].title}
       make={review ? mixOf(idx, 4) : () => makeLesson(chapters[ci].gen, scale(s.cls, step))}
       award={(c, secs) => (practice ? dailyResult(c, undefined, false) : lessonResult(c, secs, s.best[id]))}
@@ -61,13 +74,18 @@ export default function App() {
   }
 
   if (celebrate) return (
-    <div className="lesson end">
-      <div className="flame">🔥</div>
-      <div className="bignum">{celebrate}</div>
-      <h1>day streak</h1>
-      <p>Come back tomorrow to keep it going!</p>
-      <button className="btn big" onClick={() => setCelebrate(0)}>Continue</button>
-    </div>
+    <Splash bubble={celebrate === 1 ? 'A new streak! Practice every day to help it grow.' : `${celebrate} days in a row! Keep it going.`}
+      hero={<span className="flame">🔥</span>} big={String(celebrate)} caption={celebrate === 1 ? 'day streak' : 'day streak'}
+      btn="I'm coming back" onClick={() => setCelebrate(0)}>
+      <WeekStrip streak={celebrate} />
+    </Splash>
+  )
+
+  const earned = (a: (typeof ACHIEVEMENTS)[number]) => a.earned({ ...s, bestStreak: Math.max(s.bestStreak, s.streak) })
+  const badge = ACHIEVEMENTS.find((a) => a.id === badgeId)
+  if (badge) return (
+    <Splash bubble={earned(badge) ? 'You earned this badge. Well done!' : badge.desc} hero={badge.emoji} dim={!earned(badge)}
+      big={badge.name} caption={earned(badge) ? badge.desc : 'Not earned yet'} btn="Continue" onClick={() => setBadgeId('')} />
   )
 
   const board = [...FRIENDS, { name: 'You', e: '🧑‍🚀', xp: s.xp, streak: s.streak }].sort((a, b) => b.xp - a.xp)
@@ -170,6 +188,27 @@ export default function App() {
           )
         })()}
 
+        {tab === 'league' && (() => {
+          const t = TIERS[s.league]
+          const rows = leagueBoard(s.week, s.league, s.weekXp, weekProgress())
+          return (
+            <>
+              <div className="tier"><span>{t.emoji}</span><h2>{t.name} League</h2>
+                <small>{s.league === TIERS.length - 1 ? 'Top league! Stay in the top 10.' : `Top ${PROMOTE} move up to ${TIERS[s.league + 1].name}`} · {daysLeft()} day{daysLeft() > 1 ? 's' : ''} left</small></div>
+              {rows.map((e, i) => (
+                <div key={e.name}>
+                  {i === PROMOTE && <div className="zone">Stay in {t.name}</div>}
+                  {i === SIZE - DEMOTE && s.league > 0 && <div className="zone bad">Demotion zone ⬇</div>}
+                  <div className={`row ${e.me ? 'me' : ''}`}>
+                    <span className={i < PROMOTE ? 'up' : i >= SIZE - DEMOTE && s.league > 0 ? 'down' : ''}>{i + 1}</span>
+                    <span className="grow">{e.me ? 'You' : e.name}</span><span>⚡ {e.xp}</span>
+                  </div>
+                </div>
+              ))}
+            </>
+          )
+        })()}
+
         {tab === 'friends' && (
           <>
             <h2>Leaderboard</h2>
@@ -191,9 +230,19 @@ export default function App() {
                 {CLASSES.map((n, i) => <option key={n} value={i}>{n}</option>)}
               </select>
             </label>
-            <div className="row"><span className="grow">Day streak</span>🔥 {s.streak}</div>
-            <div className="row"><span className="grow">Total XP</span>⚡ {s.xp}</div>
-            <div className="row"><span className="grow">Lessons done</span>{Object.values(s.done).reduce((a, b) => a + b, 0)}</div>
+            <div className="badges stats">
+              <div className="badge on"><span>🔥</span><b>{s.streak}</b><small>Day streak</small></div>
+              <div className="badge on"><span>⚡</span><b>{s.xp}</b><small>Total XP</small></div>
+              <div className="badge on"><span>{TIERS[s.league].emoji}</span><b>{TIERS[s.league].name}</b><small>League</small></div>
+            </div>
+            <h2>Achievements</h2>
+            <div className="badges">
+              {ACHIEVEMENTS.map((a) => (
+                <button key={a.id} className={`badge ach ${earned(a) ? 'on' : ''}`} aria-label={a.name} onClick={() => setBadgeId(a.id)}>
+                  <span>{a.emoji}</span>
+                </button>
+              ))}
+            </div>
             <button className="btn red" onClick={() => { if (confirm('Erase all progress?')) { localStorage.clear(); location.reload() } }}>Reset progress</button>
           </div>
         )}

@@ -13,7 +13,7 @@ type Props = {
   onExit: () => void
   onDone: (r: Result) => void
 }
-const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+export const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
 export default function Lesson({ make, title, award, hearts, nextHeartMs, onWrong, onRefill, onExit, onDone }: Props) {
   const [queue, setQueue] = useState<Q[]>(make)
@@ -110,7 +110,7 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
   )
 }
 
-function End(p: { emoji: string; head: string; btn: string; onClick: () => void; bad?: boolean; children?: React.ReactNode }) {
+export function End(p: { emoji: string; head: string; btn: string; onClick: () => void; bad?: boolean; children?: React.ReactNode }) {
   return (
     <div className="lesson end">
       <div className="huge">{p.emoji}</div>
