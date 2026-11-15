@@ -29,3 +29,4 @@ test('daily set: stars pay once and only upgrade; bonus set pays nothing', () =>
   expect(dailyResult(4, a.next).gained).toBe(0)
   expect(dailyResult(10, undefined, false)).toMatchObject({ stars: 3, gained: 0, next: undefined })
 })
+

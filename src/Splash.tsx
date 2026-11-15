@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 
 // Full-screen celebration layout shared by the streak page and achievement pages.
-export default function Splash(p: { bubble: string; hero: ReactNode; big: string; caption?: string; dim?: boolean; children?: ReactNode; btn: string; onClick: () => void }) {
+export default function Splash(p: { bubble: string; hero: ReactNode; big: string; caption?: string; dim?: boolean; children?: ReactNode; btn: string; onClick: () => void; onClose?: () => void }) {
   return (
     <div className="splash">
+      {p.onClose && <button className="x close" aria-label="Close" onClick={p.onClose}>✕</button>}
       <div className="bubble">{p.bubble}</div>
       <div className={`hero ${p.dim ? 'dim' : ''}`} aria-hidden>{p.hero}</div>
       <div className="num">{p.big}</div>

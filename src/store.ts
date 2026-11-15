@@ -16,11 +16,14 @@ export type State = {
   league: number // tier index into TIERS
   week: string // Monday of the week weekXp belongs to
   weekXp: number
+  todayXp: number // XP earned on xpDay, drives the daily quest
+  xpDay: string
+  questHidden: string // day the finished-quest card was dismissed
 }
 export const MAX_HEARTS = 5
 const HOUR = 36e5
 const KEY = 'thecoolnerd-v1'
-const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0, bestStreak: 0, league: 0, week: '', weekXp: 0 }
+const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0, bestStreak: 0, league: 0, week: '', weekXp: 0, todayXp: 0, xpDay: '', questHidden: '' }
 // 1 heart per hour; the clock only runs while below max
 const regen = (o: State, now: number) => {
   if (o.hearts >= MAX_HEARTS) return { hearts: MAX_HEARTS, heartAt: now }
@@ -49,7 +52,7 @@ export function useStore() {
   const h = regen(s, now)
   const live = s.lastDay === day() || s.lastDay === day(1) ? s.streak : 0
   return {
-    s: { ...s, streak: live, xp: totalXp(s.best), hearts: h.hearts, nextHeartMs: h.hearts >= MAX_HEARTS ? 0 : h.heartAt + HOUR - now },
+    s: { ...s, streak: live, xp: totalXp(s.best), todayXp: s.xpDay === day() ? s.todayXp : 0, hearts: h.hearts, nextHeartMs: h.hearts >= MAX_HEARTS ? 0 : h.heartAt + HOUR - now },
     loseHeart: () => setS((o) => { const r = regen(o, Date.now()); return { ...o, hearts: Math.max(0, r.hearts - 1), heartAt: r.heartAt } }),
     // shortcut: ad watch is simulated, wire a real ad SDK before release
     refillHearts: () => setS((o) => ({ ...o, hearts: MAX_HEARTS, heartAt: Date.now() })),
@@ -61,7 +64,7 @@ export function useStore() {
         touched.forEach((k) => (last[k] = day()))
         const done = o.progress ? { ...old.done, [o.progress.key]: Math.max(old.done[o.progress.key] || 0, o.progress.step + 1) } : old.done
         const best = o.id && r.next ? { ...old.best, [o.id]: r.next } : old.best
-        return { ...old, streak, lastDay: day(), bestStreak: Math.max(old.bestStreak, streak), done, last, best, weekXp: old.weekXp + r.gained }
+        return { ...old, streak, lastDay: day(), bestStreak: Math.max(old.bestStreak, streak), done, last, best, weekXp: old.weekXp + r.gained, todayXp: (old.xpDay === day() ? old.todayXp : 0) + r.gained, xpDay: day() }
       })
     },
   }

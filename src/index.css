@@ -23,7 +23,8 @@ body { margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom
 button, select, input { font: inherit; color: inherit }
 .app, .lesson { max-width: 520px; margin: 0 auto; min-height: 100vh }
 header { position: sticky; top: 0; z-index: 3; background: var(--bg); display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 2px solid var(--line) }
-.stat { font-weight: 900; font-size: 18px }
+.stat { font-weight: 900; font-size: 18px; border: 0; background: none; padding: 6px 8px; border-radius: 12px; cursor: pointer }
+.stat:active { transform: scale(.92) }
 .cls { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0 }
 .cls span:last-child { display: flex; flex-direction: column; line-height: 1.15; min-width: 0 }
 .cls small { font-size: 13px; font-weight: 700; color: var(--muted) }
@@ -49,10 +50,12 @@ main.world { background: #9fdc78 }
 .node { position: relative; width: 72px; height: 72px; border-radius: 50%; border: 0; font-size: 28px; color: #fff; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,.25); transition: transform .1s, box-shadow .1s }
 .node:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.25) }
 .node.locked { background: var(--lock); color: var(--muted); box-shadow: 0 6px 0 var(--lock-d); cursor: not-allowed }
-/* the lesson you are on: pulsing ring + bouncing START bubble */
-.node.current { animation: ring 1.6s ease-out infinite }
-.node.current::after { content: 'START'; position: absolute; left: 50%; top: -46px; translate: -50% 0; padding: 6px 12px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); color: var(--green); font-size: 14px; letter-spacing: .5px; animation: bob 1s ease-in-out infinite }
-.node.current::before { content: ''; position: absolute; left: 50%; top: -14px; width: 12px; height: 12px; translate: -50% 0; rotate: 45deg; background: var(--card); border-right: 2px solid var(--line); border-bottom: 2px solid var(--line); z-index: 1; animation: bob 1s ease-in-out infinite }
+/* the lesson you are on: pulsing ring */
+.node.current { animation: ring 1.6s ease-out infinite, breathe 1.6s ease-in-out infinite }
+/* spinning dashed halo; uses `scale`/`rotate` so the tap-press `transform` still works */
+.node.current::after { content: ''; position: absolute; inset: -11px; border: 4px dashed #fff; border-radius: 50%; opacity: .85; animation: spin 6s linear infinite; pointer-events: none }
+@keyframes breathe { 50% { scale: 1.07 } }
+@keyframes spin { to { rotate: 360deg } }
 
 .btn { border: 0; border-radius: 16px; padding: 14px 24px; font-weight: 900; letter-spacing: .5px; text-transform: uppercase; color: var(--btn-text); background: var(--green); box-shadow: 0 4px 0 var(--green-d); cursor: pointer }
 .btn.red { background: var(--red); color: #fff; box-shadow: 0 4px 0 var(--red-d) }
@@ -74,7 +77,8 @@ main.world { background: #9fdc78 }
 .hearts { color: var(--red); font-weight: 900; font-size: 14px; white-space: nowrap }
 .qbody { flex: 1; padding: 16px; text-align: center }
 .qbody h2 { font-size: 26px; margin: 8px 0 }
-.visual { font-size: 40px; line-height: 1.3; margin: 16px 0; word-break: break-all }
+.visual { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .3em; font-size: 40px; line-height: 1.3; margin: 16px 0 }
+.visual span { max-width: 100%; word-break: break-all } /* a group only breaks if it alone is wider than the screen */
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px }
 .opt { padding: 22px 8px; font-size: 22px; background: var(--card); border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 16px; cursor: pointer; animation: pop .3s ease-out backwards }
 .opt:nth-child(2) { animation-delay: .05s } .opt:nth-child(3) { animation-delay: .1s } .opt:nth-child(4) { animation-delay: .15s }
@@ -157,3 +161,45 @@ main.world { background: #9fdc78 }
 .week { display: flex; gap: 8px; width: 100%; justify-content: space-between; margin: 24px 0 8px }
 .week div { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1 } .week small { font-weight: 900; color: var(--muted) } .week .today small { color: #ff9600 }
 .week i { width: 100%; max-width: 44px; aspect-ratio: 1; border-radius: 50%; background: var(--lock); display: grid; place-items: center; font-style: normal; font-weight: 900; color: #fff } .week i.on { background: #ff9600 }
+
+/* --- motion pass inspired by the Duolingo recording --- */
+/* sparkle burst: bits fly out from the parent's centre (correct answer, end screens, chest) */
+.opt, .huge, .chest { position: relative }
+.burst { position: absolute; left: 50%; top: 50%; pointer-events: none; --d: -56px }
+.burst.loop { --d: -110px }
+.burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 2px; background: var(--green); animation: burst .6s ease-out both }
+.burst i:nth-child(3n+1) { background: #ffc800 } .burst i:nth-child(3n+2) { background: #1cb0f6; border-radius: 50% }
+.burst.loop i { animation-duration: 1.6s; animation-iteration-count: infinite; animation-delay: calc(var(--i) * .16s) }
+@keyframes burst { 0% { transform: rotate(var(--a)) translateY(0) scale(1); opacity: 0 } 15% { opacity: 1 } 100% { transform: rotate(var(--a)) translateY(var(--d)) scale(.3); opacity: 0 } }
+/* heart counter shakes when you lose one */
+.hearts.hit { display: inline-block; animation: shake .35s }
+/* each tab fades in when you switch */
+main > * { animation: fadeIn .25s ease-out backwards }
+@keyframes fadeIn { from { opacity: 0 } }
+/* today's streak check stamps in */
+.week .today i.on { animation: stamp .45s .35s cubic-bezier(.3,1.6,.5,1) backwards }
+@keyframes stamp { from { transform: scale(2.4); opacity: 0 } }
+.tier span { display: inline-block; animation: bob 2s ease-in-out infinite }
+/* daily quest card + chest */
+.daily.quest { background: var(--card); border-color: var(--line) }
+.daily:disabled { cursor: default }
+.qbar { position: relative; display: block; height: 18px; margin-top: 6px; background: var(--line); border-radius: 9px; overflow: hidden }
+.qbar i { display: block; height: 100%; background: #ff86d0; border-radius: 9px; transition: width .6s cubic-bezier(.3,1.4,.5,1) }
+.qbar em { position: absolute; inset: 0; font-style: normal; font-size: 12px; line-height: 18px; text-align: center }
+.wiggle, .chest { display: inline-block }
+.wiggle, .chest.shut { animation: wiggle 1.2s ease-in-out infinite; cursor: pointer }
+.chest.open { animation: pop .5s ease-out }
+@keyframes wiggle { 0%, 55%, 100% { transform: rotate(0) } 65% { transform: rotate(-12deg) } 75% { transform: rotate(12deg) } 85% { transform: rotate(-6deg) } }
+/* floating "back to my lesson" button above the tab bar */
+.jump { position: fixed; z-index: 4; right: max(16px, calc(50% - 244px)); bottom: calc(84px + env(safe-area-inset-bottom)); width: 52px; height: 52px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; background: var(--card); font-size: 24px; cursor: pointer }
+@media (prefers-reduced-motion: reduce) { .burst { display: none } }
+/* streak / hearts detail pages */
+.splash { position: relative } .splash .close { position: absolute; top: 16px; left: 16px }
+.heartrow { display: flex; gap: 8px; font-size: 32px } .heartrow .off { filter: grayscale(1); opacity: .35 }
+/* best stars under each lesson node */
+.nstars { position: absolute; left: 50%; top: calc(100% + 8px); translate: -50% 0; display: flex; gap: 2px; padding: 3px 7px; border-radius: 10px; background: rgba(0,0,0,.4); font-size: 16px; line-height: 1; pointer-events: none }
+.nstars i { font-style: normal; color: rgba(255,255,255,.35) } .nstars i.on { color: #ffc800; text-shadow: 0 2px 0 #c99700 }
+/* dismissable quest card */
+.qwrap { position: relative } .qclose { position: absolute; top: 22px; right: 12px; font-size: 18px }
+/* reduce motion: nothing moves, but the current lesson still gets a soft glow so kids can find it */
+@media (prefers-reduced-motion: reduce) { .node.current { animation: ring 2.4s ease-out infinite !important } }

@@ -13,6 +13,26 @@ type Props = {
   onExit: () => void
   onDone: (r: Result) => void
 }
+// sparkle bits flying out of the parent's centre; `loop` keeps twinkling (end screens)
+export const Burst = ({ loop }: { loop?: boolean }) => (
+  <span className={`burst ${loop ? 'loop' : ''}`} aria-hidden>
+    {Array.from({ length: 10 }, (_, i) => <i key={i} style={{ '--a': `${i * 36}deg`, '--i': i } as React.CSSProperties} />)}
+  </span>
+)
+// number that ticks up from 0, like the XP box on Duolingo's end screen
+export function CountUp({ to }: { to: number }) {
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    let v = 0
+    const t = setInterval(() => { v = Math.min(to, v + Math.max(1, Math.ceil(to / 20))); setN(v); if (v >= to) clearInterval(t) }, 40)
+    return () => clearInterval(t)
+  }, [to])
+  return <>{n}</>
+}
+// each space-separated group wraps as one unit, so "🍪🍪🍪 = 🍪🍪🍪" never splits a group across rows
+export const Visual = ({ v, pop }: { v: string; pop?: boolean }) => (
+  <div className={`visual ${pop ? 'pop' : ''}`} aria-hidden>{v.split(/\s+/).map((g, i) => <span key={i}>{g}</span>)}</div>
+)
 export const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
 export default function Lesson({ make, title, award, hearts, nextHeartMs, onWrong, onRefill, onExit, onDone }: Props) {
@@ -44,7 +64,7 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
     return (
       <End emoji={r.stars === 3 ? '🦉' : '🏆'} head={r.stars === 3 ? 'Perfect lesson!' : 'Lesson complete!'} btn="Claim XP" onClick={() => onDone(r)}>
         <div className="boxes">
-          <div className="box xp"><small>XP</small><b>⚡ {r.gained}</b></div>
+          <div className="box xp"><small>XP</small><b>⚡ <CountUp to={r.gained} /></b></div>
           <div className="box st"><small>STARS</small><b>{'⭐'.repeat(r.stars) || '—'}</b></div>
           <div className="box tm"><small>TIME</small><b>{clock(secs)}</b></div>
         </div>
@@ -83,16 +103,16 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
             <i style={{ width: `${correct * 10}%` }} />
           </div>
         </div>
-        <span className="hearts">⏱ {clock(secs)} · ❤️ {hearts}</span>
+        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}>⏱ {clock(secs)} · ❤️ {hearts}</span>
       </div>
 
       <div className="qbody">
         <h2>{q.prompt}</h2>
-        {q.visual && <div className="visual" aria-hidden>{q.visual}</div>}
+        {q.visual && <Visual v={q.visual} />}
         {q.options ? (
           <div className="opts">
             {q.options.map((o) => (
-              <button key={o} className={`opt ${pick === o ? 'sel' : ''} ${pick === o ? result : ''}`} disabled={!!result} onClick={() => setPick(o)}>{o}</button>
+              <button key={o} className={`opt ${pick === o ? 'sel' : ''} ${pick === o ? result : ''}`} disabled={!!result} onClick={() => setPick(o)}>{o}{pick === o && result === 'ok' && <Burst />}</button>
             ))}
           </div>
         ) : (
@@ -113,7 +133,7 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
 export function End(p: { emoji: string; head: string; btn: string; onClick: () => void; bad?: boolean; children?: React.ReactNode }) {
   return (
     <div className="lesson end">
-      <div className="huge">{p.emoji}</div>
+      <div className="huge">{p.emoji}{!p.bad && <Burst loop />}</div>
       <h1>{p.head}</h1>
       {p.children}
       <button className={`btn big ${p.bad ? 'red' : ''}`} onClick={p.onClick}>{p.btn}</button>

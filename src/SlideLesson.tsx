@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import type { Result } from './xp'
-import { End, clock } from './Lesson'
+import { Burst, CountUp, End, Visual, clock } from './Lesson'
 import type { Slide } from './slides'
 
 type Props = {
@@ -39,7 +39,7 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
     return (
       <End emoji={r.stars === 3 ? '🦉' : '🏆'} head={r.stars === 3 ? 'Perfect lesson!' : 'Lesson complete!'} btn="Claim XP" onClick={() => onDone(r)}>
         <div className="boxes">
-          <div className="box xp"><small>XP</small><b>⚡ {r.gained}</b></div>
+          <div className="box xp"><small>XP</small><b>⚡ <CountUp to={r.gained} /></b></div>
           <div className="box st"><small>STARS</small><b>{'⭐'.repeat(r.stars) || '—'}</b></div>
           <div className="box tm"><small>TIME</small><b>{clock(secs)}</b></div>
         </div>
@@ -72,23 +72,23 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
             <i style={{ width: `${(i / slides.length) * 100}%` }} />
           </div>
         </div>
-        <span className="hearts">❤️ {hearts}</span>
+        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}>❤️ {hearts}</span>
       </div>
 
       <div className="qbody">
         {s.kind === 'explain' ? (
           <>
-            <div className="visual pop" aria-hidden>{s.visual}</div>
+            <Visual v={s.visual} pop />
             <h2>{s.title}</h2>
             <p className="explain">{s.text}</p>
           </>
         ) : (
           <>
             <h2>{s.prompt}</h2>
-            {s.visual && <div className="visual" aria-hidden>{s.visual}</div>}
+            {s.visual && <Visual v={s.visual} />}
             <div className="opts">
               {s.options.map((o) => (
-                <button key={o} className={`opt ${pick === o ? 'sel' : ''} ${pick === o ? result : ''}`} disabled={result === 'ok'} onClick={() => { setPick(o); setResult('') }}>{o}</button>
+                <button key={o} className={`opt ${pick === o ? 'sel' : ''} ${pick === o ? result : ''}`} disabled={result === 'ok'} onClick={() => { setPick(o); setResult('') }}>{o}{pick === o && result === 'ok' && <Burst />}</button>
               ))}
             </div>
             <button className="back" onClick={() => setHint(true)}>💡 Hint</button>
