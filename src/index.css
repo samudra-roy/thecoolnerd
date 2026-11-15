@@ -5,7 +5,7 @@
   --blue:#1899d6; --blue-l:#ddf4ff; --blue-b:#84d8ff;
   --sun-l:#fff4d6; --sun-b:#ffc800; --sun-t:#a37d00;
   --ok-bg:#d7ffb8; --ok-t:#58a700; --bad-bg:#ffdfe0; --bad-t:#ea2b2b;
-  --purple:#8a6bd1; --lock:#e5e5e5; --lock-d:#cfcfcf; --dis:#e5e5e5; --dis-t:#afafaf;
+  --orange:#ff9600; --purple:#8a6bd1; --lock:#e5e5e5; --lock-d:#cfcfcf; --dis:#e5e5e5; --dis-t:#afafaf;
 }
 /* Dark mode follows the phone setting, like the Duolingo recording */
 @media (prefers-color-scheme: dark) {
@@ -22,12 +22,14 @@
 html { scrollbar-gutter: stable }
 /* line icons (src/Icon.tsx): sit on the text baseline like the emoji they replaced */
 .i { display: inline-block; vertical-align: -.14em; flex: none }
-.c-fire { color: #ff9600 } .c-heart, .c-red { color: var(--red) } .c-star { color: #ffc800 } .c-ok { color: var(--green) } .c-pink { color: #ff86d0 }
+.c-fire { color: var(--orange) } .c-heart, .c-red { color: var(--red) } .c-star { color: #ffc800 } .c-ok { color: var(--green) } .c-pink { color: #ff86d0 }
 .setstars { display: inline-flex; gap: 10px } .setstars .i:not(.c-star) { color: var(--muted) }
 .pcard .i { stroke-width: 2.4 } /* keep width constant so the fixed tab bar doesn't jump when a tab is short enough to lose its scrollbar */
 body { margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); font-family: Nunito, system-ui, sans-serif; font-weight: 800; color: var(--text); background: var(--bg) }
 button, select, input { font: inherit; color: inherit }
-.app, .lesson { max-width: 520px; margin: 0 auto; min-height: 100vh }
+button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none }
+:focus-visible { outline: 3px solid var(--blue-b); outline-offset: 2px }
+.app, .lesson { max-width: 520px; margin: 0 auto; min-height: 100dvh }
 header { position: sticky; top: 0; z-index: 3; background: var(--bg); display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 2px solid var(--line) }
 .stat { font-weight: 900; font-size: 18px; border: 0; background: none; padding: 6px 8px; border-radius: 12px; cursor: pointer }
 .stat:active { transform: scale(.92) }
@@ -36,16 +38,21 @@ header { position: sticky; top: 0; z-index: 3; background: var(--bg); display: f
 .cls small { font-size: 13px; font-weight: 700; color: var(--muted) }
 .cls b { font-size: 20px; font-weight: 900; color: var(--green-d); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .av { width: 44px; height: 44px; flex: none; display: grid; place-items: center; font-size: 26px; border-radius: 50%; background: var(--blue-l); border: 2px solid var(--blue-b) }
-.subjects { display: flex; gap: 8px; padding: 0; overflow-x: auto }
+.subjects { display: flex; gap: 8px; margin: 16px 0 0; padding: 0 0 2px; overflow-x: auto; scrollbar-width: none }
 .chip { padding: 8px 14px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; background: var(--card); white-space: nowrap; cursor: pointer }
 .chip.on { border-color: var(--blue-b); background: var(--blue-l); color: var(--blue) }
-.chip:disabled { opacity: .5; cursor: not-allowed }
-main { padding: 0 16px 120px }
+.chip:disabled { color: var(--muted); cursor: not-allowed }
+/* flow-root keeps the first card's top margin inside main, so no strip of page background shows under the header */
+main { display: flow-root; padding: 0 16px 120px }
 h2 { font-size: 18px; margin: 20px 0 10px }
 
-/* chapter card sticks under the header; the next chapter's card slides over it */
-.banner { position: sticky; top: 62px; z-index: 2; display: flex; justify-content: space-between; align-items: center; color: #fff; padding: 14px 18px; border-radius: 18px; box-shadow: 0 5px 0 rgba(0,0,0,.22) }
-.banner h3 { margin: 2px 0 0; font-size: 20px } .banner small { opacity: .85; letter-spacing: 1px }
+/* chapter ribbon banner: sticks under the header; notched tails fold behind it in a darker shade.
+   tails use z-index -1 inside the sticky element's own stacking context, so they sit behind the strip only */
+.banner { position: sticky; top: 70px; z-index: 2; align-self: center; width: min(300px, calc(100% - 64px)); margin-top: 6px; padding: 7px 12px 9px; text-align: center; color: #fff; background: var(--c); border-radius: 4px; box-shadow: inset 0 -4px 0 rgba(0,0,0,.15), 0 5px 0 rgba(0,0,0,.2) }
+.banner::before, .banner::after { content: ''; position: absolute; z-index: -1; top: 12px; width: 40px; height: 100%; background: linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,.28)), var(--c) }
+.banner::before { left: -28px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 30% 50%) }
+.banner::after { right: -28px; clip-path: polygon(0 0, 100% 0, 70% 50%, 100% 100%, 0 100%) }
+.banner small { font-size: 11px; letter-spacing: 1.5px; opacity: .9 } .banner h3 { margin: 1px 0 0; font-size: 19px; line-height: 1.2; text-shadow: 0 2px 0 rgba(0,0,0,.15) }
 .emo { font-size: 38px }
 /* home only: grass, and one tall looping map (public/world.svg from scripts/gen-scenes.mjs) behind all chapters.
    every chapter is exactly 760px with its path at the bottom, so the baked-in road always passes through the nodes */
@@ -57,9 +64,12 @@ main.world { background: #9fdc78 }
 .node:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.25) }
 .node.locked { background: var(--lock); color: var(--muted); box-shadow: 0 6px 0 var(--lock-d); cursor: not-allowed }
 /* the lesson you are on: pulsing ring */
-.node.current { animation: ring 1.6s ease-out infinite, breathe 1.6s ease-in-out infinite }
-/* spinning dashed halo; uses `scale`/`rotate` so the tap-press `transform` still works */
-.node.current::after { content: ''; position: absolute; inset: -11px; border: 4px dashed #fff; border-radius: 50%; opacity: .85; animation: spin 6s linear infinite; pointer-events: none }
+.node.current { animation: breathe 1.6s ease-in-out infinite }
+/* spinning dashed halo, outlined so it reads on light grass too; uses `scale`/`rotate` so the tap-press `transform` still works */
+.node.current::after { content: ''; position: absolute; inset: -13px; border: 5px dashed #fff; border-radius: 50%; filter: drop-shadow(0 0 1.5px rgba(0,0,0,.55)); animation: spin 6s linear infinite; pointer-events: none }
+/* white ripple that grows out of the halo and fades: the "tap me" signal (was a green glow, lost on green grass) */
+.node.current::before { content: ''; position: absolute; inset: -13px; border: 4px solid #fff; border-radius: 50%; animation: ripple 1.6s ease-out infinite; pointer-events: none }
+@keyframes ripple { from { scale: 1; opacity: .9 } to { scale: 1.45; opacity: 0 } }
 @keyframes breathe { 50% { scale: 1.07 } }
 @keyframes spin { to { rotate: 360deg } }
 
@@ -68,27 +78,27 @@ main.world { background: #9fdc78 }
 .btn:disabled { background: var(--dis); color: var(--dis-t); box-shadow: 0 4px 0 var(--lock-d); cursor: not-allowed }
 .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.2) }
 .btn.alt { background: none; color: var(--green); border: 2px solid var(--green); box-shadow: 0 4px 0 var(--line) }
-.back { border: 0; background: none; color: var(--blue); font-weight: 900; font-size: 16px; padding: 12px 0 0; cursor: pointer }
+.back { border: 0; background: none; color: var(--blue); font-weight: 900; font-size: 16px; min-height: 44px; padding: 12px 12px 0 0; cursor: pointer }
 .row:disabled { opacity: .5; cursor: not-allowed }
 .btn.big { width: 100%; padding: 16px }
 
 .lesson { display: flex; flex-direction: column }
 .lbar { display: flex; align-items: center; gap: 14px; padding: 26px 16px 18px }
-.x { background: none; border: 0; font-size: 22px; color: var(--muted); cursor: pointer }
+.x { display: grid; place-items: center; width: 44px; height: 44px; margin: -10px; padding: 0; background: none; border: 0; border-radius: 12px; font-size: 26px; color: var(--muted); cursor: pointer }
 .pwrap { position: relative; flex: 1 }
 .combo { position: absolute; top: -18px; left: 2px; font-size: 11px; letter-spacing: 1px; color: var(--green); animation: pop .25s ease-out }
 .progress { height: 16px; background: var(--line); border-radius: 8px; overflow: hidden }
 .progress i { position: relative; display: block; height: 100%; background: var(--green); border-radius: 8px; transition: width .4s cubic-bezier(.3,1.4,.5,1) }
 .progress i::after { content: ''; position: absolute; left: 8px; right: 8px; top: 3px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.35) } /* the glossy highlight */
-.hearts { color: var(--red); font-weight: 900; font-size: 14px; white-space: nowrap }
+.hearts { color: var(--red); font-weight: 900; font-size: 14px; white-space: nowrap } .hearts .time { color: var(--muted); margin-right: 8px }
 .qbody { flex: 1; padding: 16px; text-align: center }
 .qbody h2 { font-size: 26px; margin: 8px 0 }
 .visual { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .3em; font-size: 40px; line-height: 1.3; margin: 16px 0 }
 .visual span { max-width: 100%; word-break: break-all } /* a group only breaks if it alone is wider than the screen */
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px }
-.opt { padding: 22px 8px; font-size: 22px; background: var(--card); border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 16px; cursor: pointer; animation: pop .3s ease-out backwards }
+.opt { padding: 22px 8px; font-size: 22px; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; cursor: pointer; animation: pop .3s ease-out backwards }
 .opt:nth-child(2) { animation-delay: .05s } .opt:nth-child(3) { animation-delay: .1s } .opt:nth-child(4) { animation-delay: .15s }
-.opt:active:not(:disabled) { transform: translateY(3px); border-bottom-width: 2px; margin-bottom: 3px }
+.opt:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 2px; margin-bottom: 2px }
 .opt.sel { border-color: var(--blue-b); background: var(--blue-l); color: var(--blue) }
 .opt.sel.ok { border-color: var(--green); background: var(--ok-bg); color: var(--ok-t) }
 .opt.sel.bad { border-color: var(--red); background: var(--bad-bg); color: var(--bad-t); animation: shake .35s }
@@ -97,14 +107,14 @@ main.world { background: #9fdc78 }
 .foot { padding: 16px; border-top: 2px solid var(--line) }
 .foot.ok, .foot.bad { animation: slideUp .25s ease-out }
 .foot.ok { background: var(--ok-bg); color: var(--ok-t) } .foot.bad { background: var(--bad-bg); color: var(--bad-t) }
-.msg { font-size: 20px; font-weight: 900; margin-bottom: 12px }
+.msg { font-size: 20px; font-weight: 900; margin-bottom: 12px; text-align: left }
 
 .end { align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px }
 .end > * { animation: pop .4s ease-out backwards } .end > :nth-child(2) { animation-delay: .1s } .end > :nth-child(3) { animation-delay: .2s } .end > :nth-child(4) { animation-delay: .3s }
 .end h1 { margin: 0 0 8px; color: var(--sun-t) }
 .huge { font-size: 96px }
 .boxes { display: flex; gap: 10px; width: 100% }
-.box { flex: 1; border: 2px solid; border-radius: 14px; overflow: hidden; background: var(--card) }
+.box { flex: 1; border: 2px solid; border-radius: 16px; overflow: hidden; background: var(--card) }
 .box small { display: block; padding: 4px 0; color: #fff; font-size: 11px; letter-spacing: 1px }
 .box b { display: block; padding: 12px 4px; font-size: 20px }
 .box.xp { border-color: var(--sun-b) } .box.xp small { background: var(--sun-b); color: #7a5b00 }
@@ -112,19 +122,20 @@ main.world { background: #9fdc78 }
 .box.tm { border-color: var(--green) } .box.tm small { background: var(--green); color: var(--btn-text) }
 .fine { margin: 4px 0 16px; color: var(--muted); font-size: 14px }
 .flame { font-size: 120px; animation: flicker 1.2s ease-in-out infinite !important }
-.bignum { font-size: 80px; font-weight: 900; color: #ff9600; line-height: 1 }
+.bignum { font-size: 80px; font-weight: 900; color: var(--orange); line-height: 1 }
 
-.pick { width: 100%; padding: 12px; border: 2px solid var(--line); border-radius: 14px; background: var(--card) }
-.row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px; margin-bottom: 10px; background: var(--card); border: 2px solid var(--line); border-radius: 16px; text-align: left; cursor: pointer }
+.pick { width: 100%; padding: 12px; border: 2px solid var(--line); border-radius: 16px; background: var(--card) }
+.row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 12px 14px; margin-bottom: 10px; background: var(--card); border: 2px solid var(--line); border-radius: 16px; text-align: left }
+button.row { cursor: pointer } .row .rank { width: 24px; text-align: center } .row .chev { color: var(--muted); font-size: 20px }
 .row.me { background: var(--blue-l); border-color: var(--blue-b) }
 .row .emo { font-size: 28px } .grow { flex: 1 }
 .row select { border: 0; background: none; font-weight: 900; text-align: right }
 .row select option { color: #111 }
-.profile { text-align: center } .profile .row { text-align: left; cursor: default } .profile .btn { margin-top: 16px }
+.profile { text-align: center } .profile .row { text-align: left } .profile .btn { margin-top: 16px }
 /* profile stat cards: bright card, white title, pill button, big emoji peeking in from the right */
 .pcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0 }
-.pcard { position: relative; overflow: hidden; min-width: 0; padding: 12px 10px 40px; border-radius: 18px; text-align: left; color: #fff; background: radial-gradient(circle at 85% 30%, rgba(255,255,255,.22) 0 30%, transparent 31%), radial-gradient(circle at 10% 110%, rgba(0,0,0,.08) 0 25%, transparent 26%) var(--c) }
-.pcard.fire { --c: #ff9600 } .pcard.zap { --c: #58cc02 } .pcard.cup { --c: #1cb0f6 }
+.pcard { position: relative; overflow: hidden; min-width: 0; padding: 12px 10px 40px; border-radius: 16px; text-align: left; color: #fff; background: radial-gradient(circle at 85% 30%, rgba(255,255,255,.22) 0 30%, transparent 31%), radial-gradient(circle at 10% 110%, rgba(0,0,0,.08) 0 25%, transparent 26%) var(--c) }
+.pcard.fire { --c: var(--orange) } .pcard.zap { --c: #58cc02 } .pcard.cup { --c: #1cb0f6 }
 .pcard h3 { margin: 0; font-size: 20px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .pcard p { margin: 0; font-size: 12px; font-weight: 700; opacity: .95 }
 .pcard span { position: absolute; right: -2px; bottom: -8px; font-size: 48px; line-height: 1; transform: rotate(-8deg); pointer-events: none }
 
@@ -133,24 +144,21 @@ main.world { background: #9fdc78 }
 .tabs button span { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; font-size: 26px; color: var(--text); transition: transform .15s, background .15s }
 .tabs button small { font-size: 12px; font-weight: 800 }
 /* selected tab: a lifted paper disc, lit from the top with a soft shadow under it */
-.tabs button.on { color: #ff9600 }
+.tabs button.on { color: var(--orange) }
 .tabs button.on span { color: #3d2200; transform: translateY(-2px); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.045' numOctaves='3' seed='7'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='4'%3E%3CfeDistantLight azimuth='225' elevation='50'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23p)'/%3E%3C/svg%3E") center/cover, linear-gradient(160deg, #ffd59a, #ffa62b 75%); background-blend-mode: multiply; box-shadow: inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 0 rgba(0,0,0,.12), 0 4px 8px rgba(255,150,0,.45) }
 
-.daily { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 16px; padding: 16px; text-align: left; background: var(--sun-l); border: 2px solid var(--sun-b); border-bottom-width: 5px; border-radius: 18px; cursor: pointer }
-.daily small { color: var(--sun-t) } .go { color: var(--btn-text); background: var(--green); padding: 8px 14px; border-radius: 12px; font-weight: 900 }
-.subjects { margin: 14px 0 0 }
+.daily { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 16px; padding: 16px; text-align: left; background: var(--sun-l); border: 2px solid var(--sun-b); border-bottom-width: 4px; border-radius: 16px; cursor: pointer }
+.daily small { color: var(--sun-t) } .go { color: var(--btn-text); background: var(--green); padding: 8px 14px; border-radius: 12px; font-weight: 900; letter-spacing: .5px; box-shadow: 0 3px 0 var(--green-d) }
 
 @keyframes pop { from { transform: scale(.85); opacity: 0 } 70% { transform: scale(1.04) } }
 @keyframes slideUp { from { transform: translateY(100%) } }
 @keyframes shake { 20% { transform: translateX(-6px) } 40% { transform: translateX(6px) } 60% { transform: translateX(-4px) } 80% { transform: translateX(4px) } }
 @keyframes bob { 50% { transform: translateY(-5px) } }
-@keyframes ring { 0% { box-shadow: 0 6px 0 rgba(0,0,0,.25), 0 0 0 0 rgba(137,226,25,.55) } 100% { box-shadow: 0 6px 0 rgba(0,0,0,.25), 0 0 0 14px rgba(137,226,25,0) } }
 @keyframes flicker { 0%, 100% { transform: scale(1) rotate(-3deg) } 50% { transform: scale(1.08) rotate(3deg) } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important } }
 .explain { font-size: 18px; line-height: 1.5; text-align: center; margin: 8px 0 }
-.visual.pop { font-size: 56px; text-align: center; animation: pop .6s ease-out both }
-@keyframes pop { 0% { transform: scale(.4); opacity: 0 } 70% { transform: scale(1.12) } 100% { transform: scale(1); opacity: 1 } }
-@media (prefers-reduced-motion: reduce) { .visual.pop { animation: none } }
+.visual.pop { font-size: 56px; text-align: center; animation: popIn .6s ease-out both }
+@keyframes popIn { 0% { transform: scale(.4); opacity: 0 } 70% { transform: scale(1.12) } 100% { transform: scale(1); opacity: 1 } }
 .tier { text-align: center; margin: 16px 0 }
 .tier span { font-size: 56px } .tier h2 { margin: 4px 0 } .tier small { color: var(--muted); font-weight: 700 }
 .zone { text-align: center; font-weight: 900; font-size: 13px; color: var(--ok-t); margin: 6px 0 }
@@ -164,15 +172,15 @@ main.world { background: #9fdc78 }
 .sticker:active { transform: scale(.9) }
 .sticker:not(.on) span { filter: grayscale(1) brightness(.7); opacity: .35 }
 .splash { min-height: 100dvh; max-width: 520px; margin: 0 auto; padding: 56px 20px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px }
-.bubble { position: relative; padding: 18px 20px; border: 2px solid var(--line); border-radius: 22px; font-size: 18px; line-height: 1.5; margin-bottom: 18px }
+.bubble { position: relative; padding: 18px 20px; border: 2px solid var(--line); border-radius: 16px; font-size: 18px; line-height: 1.5; margin-bottom: 18px }
 .bubble::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 16px; height: 16px; background: var(--bg); border: solid var(--line); border-width: 0 2px 2px 0; transform: translateX(-50%) rotate(45deg) }
 .hero { font-size: 140px; line-height: 1 } .hero.dim { filter: grayscale(1); opacity: .45 }
-.splash .num { font-size: 56px; font-weight: 900; color: #ff9600; line-height: 1.05 }
-.splash .cap { font-size: 22px; font-weight: 900; color: #ff9600 }
+.splash .num { font-size: 56px; font-weight: 900; color: var(--orange); line-height: 1.05 }
+.splash .cap { font-size: 22px; font-weight: 900; color: var(--orange) }
 .splash .btn { margin-top: auto }
 .week { display: flex; gap: 8px; width: 100%; justify-content: space-between; margin: 24px 0 8px }
-.week div { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1 } .week small { font-weight: 900; color: var(--muted) } .week .today small { color: #ff9600 }
-.week i { width: 100%; max-width: 44px; aspect-ratio: 1; border-radius: 50%; background: var(--lock); display: grid; place-items: center; font-style: normal; font-weight: 900; color: #fff } .week i.on { background: #ff9600 }
+.week div { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1 } .week small { font-weight: 900; color: var(--muted) } .week .today small { color: var(--orange) }
+.week i { width: 100%; max-width: 44px; aspect-ratio: 1; border-radius: 50%; background: var(--lock); display: grid; place-items: center; font-style: normal; font-size: 20px; color: #fff } .week i .i { stroke-width: 3 } .week i.on { background: var(--orange) }
 
 /* --- motion pass inspired by the Duolingo recording --- */
 /* sparkle burst: bits fly out from the parent's centre (correct answer, end screens, chest) */
@@ -206,15 +214,16 @@ main > * { animation: fadeIn .25s ease-out backwards }
 .jump { position: fixed; z-index: 4; right: max(16px, calc(50% - 244px)); bottom: calc(84px + env(safe-area-inset-bottom)); width: 52px; height: 52px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; background: var(--card); font-size: 24px; cursor: pointer }
 @media (prefers-reduced-motion: reduce) { .burst { display: none } }
 /* streak / hearts detail pages */
-.splash { position: relative } .splash .close { position: absolute; top: 16px; left: 16px }
+.splash { position: relative } .splash .close { position: absolute; top: 12px; left: 12px; margin: 0 }
 .heartrow { display: flex; gap: 8px; font-size: 32px } .heartrow .off { filter: grayscale(1); opacity: .35 }
 /* best stars under each lesson node */
 .nstars { position: absolute; left: 50%; top: calc(100% + 8px); translate: -50% 0; display: flex; gap: 2px; padding: 3px 7px; border-radius: 10px; background: rgba(0,0,0,.4); font-size: 16px; line-height: 1; pointer-events: none }
 .nstars i { font-style: normal; color: rgba(255,255,255,.35) } .nstars i.on { color: #ffc800; text-shadow: 0 2px 0 #c99700 }
 /* dismissable quest card */
-.qwrap { position: relative } .qclose { position: absolute; top: 22px; right: 12px; font-size: 18px }
-/* reduce motion: nothing moves, but the current lesson still gets a soft glow so kids can find it */
-@media (prefers-reduced-motion: reduce) { .node.current { animation: ring 2.4s ease-out infinite !important } }
+.qwrap { position: relative } .qclose { position: absolute; top: 18px; right: 2px; margin: 0; font-size: 20px }
+/* reduce motion: nothing moves or grows, but the white ring still fades in and out so kids can find the current lesson */
+@media (prefers-reduced-motion: reduce) { .node.current::before { animation: fade 1.4s ease-in-out infinite !important; scale: 1.2 } }
+@keyframes fade { 50% { opacity: .1 } }
 /* Login: pink hero with mascot, white sheet with social buttons */
 .login { min-height: 100dvh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; background: #f0607f }
 .login .top { flex: 1; display: grid; place-items: center; padding: 40px 24px 0 }

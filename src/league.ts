@@ -32,7 +32,7 @@ export type Entry = { name: string; xp: number; me?: boolean }
 // progress = how far through the week we are; rivals earn their weekly target gradually
 export function board(week: string, tier: number, myXp: number, progress: number): Entry[] {
   const r = rng(`${week}:${tier}`)
-  const rivals = NAMES.slice(0, SIZE - 1).map((name) => ({ name, xp: Math.round((80 + r() * (320 + tier * 120)) * progress) }))
+  const rivals: Entry[] = NAMES.slice(0, SIZE - 1).map((name) => ({ name, xp: Math.round((80 + r() * (320 + tier * 120)) * progress) }))
   return [...rivals, { name: 'You', xp: myXp, me: true }].sort((a, b) => b.xp - a.xp || +!!b.me - +!!a.me)
 }
 

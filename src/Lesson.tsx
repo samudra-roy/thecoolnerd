@@ -59,7 +59,7 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
 
   if (hearts === 0) return <End emoji="💔" head="Out of hearts!" btn="Not now" onClick={onExit} bad>
     <p>Next heart in {Math.ceil(nextHeartMs / 6e4)} min.</p>
-    <button className="btn big" onClick={onRefill}>▶ Watch ad: refill hearts</button>
+    <button className="btn big" onClick={onRefill}><Icon name="play" /> Watch ad: refill hearts</button>
   </End>
   if (!q) {
     const r = award(first, secs)
@@ -98,14 +98,14 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
   return (
     <div className="lesson">
       <div className="lbar">
-        <button className="x" aria-label="Quit lesson" onClick={onExit}>✕</button>
+        <button className="x" aria-label="Quit lesson" onClick={onExit}><Icon name="close" /></button>
         <div className="pwrap">
           {combo >= 3 && <span className="combo">COMBO x{combo}</span>}
           <div className="progress" role="progressbar" aria-label={title} aria-valuenow={correct} aria-valuemax={10}>
             <i style={{ width: `${correct * 10}%` }} />
           </div>
         </div>
-        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}><Icon name="clock" /> {clock(secs)} · <Icon name="heart" /> {hearts}</span>
+        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}><span className="time"><Icon name="clock" /> {clock(secs)}</span><Icon name="heart" /> {hearts}</span>
       </div>
 
       <div className="qbody">
@@ -123,7 +123,7 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
       </div>
 
       <div className={`foot ${result}`}>
-        {result && <div className="msg">{result === 'ok' ? '✓ Correct!' : `✗ Correct answer: ${q.answer}`}</div>}
+        {result && <div className="msg">{result === 'ok' ? <><Icon name="done" /> Correct!</> : <><Icon name="close" /> Correct answer: {q.answer}</>}</div>}
         <button className={`btn big ${result === 'bad' ? 'red' : ''}`} disabled={!pick && !result} onClick={result ? next : check}>
           {result ? 'Continue' : 'Check'}
         </button>

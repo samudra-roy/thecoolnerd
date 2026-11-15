@@ -31,7 +31,7 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
   if (hearts === 0) return (
     <End emoji="💔" head="Out of hearts!" btn="Not now" onClick={onExit} bad>
       <p>Next heart in {Math.ceil(nextHeartMs / 6e4)} min.</p>
-      <button className="btn big" onClick={onRefill}>▶ Watch ad: refill hearts</button>
+      <button className="btn big" onClick={onRefill}><Icon name="play" /> Watch ad: refill hearts</button>
     </End>
   )
   if (!s) {
@@ -67,7 +67,7 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
   return (
     <div className="lesson">
       <div className="lbar">
-        <button className="x" aria-label="Quit lesson" onClick={onExit}>✕</button>
+        <button className="x" aria-label="Quit lesson" onClick={onExit}><Icon name="close" /></button>
         <div className="pwrap">
           <div className="progress" role="progressbar" aria-label={title} aria-valuenow={i} aria-valuemax={slides.length}>
             <i style={{ width: `${(i / slides.length) * 100}%` }} />
@@ -99,7 +99,7 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
       </div>
 
       <div className={`foot ${result}`}>
-        {result && <div className="msg">{result === 'ok' ? '✓ Correct!' : '✗ Not quite, try again'}</div>}
+        {result && <div className="msg">{result === 'ok' ? <><Icon name="done" /> Correct!</> : <><Icon name="close" /> Not quite, try again</>}</div>}
         {s.kind === 'explain' || result === 'ok'
           ? <button className="btn big" onClick={go}>Continue</button>
           : <button className={`btn big ${result === 'bad' ? 'red' : ''}`} disabled={!pick} onClick={check}>Check</button>}

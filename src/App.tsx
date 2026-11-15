@@ -13,6 +13,7 @@ import { DEMOTE, PROMOTE, SIZE, TIERS, board as leagueBoard, daysLeft, weekProgr
 import { SLIDE_LESSONS, SLIDE_XP } from './slides'
 
 const COLORS = ['#58cc02', '#1cb0f6', '#ce82ff', '#ff9600', '#ff86d0']
+const NAME = 'Princesam' // shortcut: one hardcoded learner name, read it from the account when auth lands
 const QUEST_XP = 30 // daily quest goal
 const CHEST_XP = 20 // reward, stored as a best entry so totalXp picks it up
 const OFFSETS = [-30, 20, 50, 10, -40]
@@ -90,7 +91,7 @@ export default function App() {
 
   if (celebrate) return (
     <Splash bubble={celebrate === 1 ? 'A new streak! Practice every day to help it grow.' : `${celebrate} days in a row! Keep it going.`}
-      hero={<span className="flame">🔥</span>} big={String(celebrate)} caption={celebrate === 1 ? 'day streak' : 'day streak'}
+      hero={<span className="flame">🔥</span>} big={String(celebrate)} caption="day streak"
       btn="I'm coming back" onClick={() => setCelebrate(0)}>
       <WeekStrip streak={celebrate} />
     </Splash>
@@ -110,7 +111,7 @@ export default function App() {
     return (
       <Splash onClose={close} bubble={full ? 'Your hearts are full. Go learn something!' : 'You lose a heart for each wrong answer. One comes back every hour.'}
         hero="❤️" big={`${s.hearts} / ${MAX_HEARTS}`} caption={full ? 'Full hearts' : `Next heart in ${Math.ceil(s.nextHeartMs / 6e4)} min`}
-        btn={full ? 'Keep learning' : '▶ Watch ad: refill hearts'} onClick={full ? close : refillHearts}>
+        btn={full ? 'Keep learning' : 'Watch ad: refill hearts'} onClick={full ? close : refillHearts}>
         <div className="heartrow" aria-hidden>{Array.from({ length: MAX_HEARTS }, (_, i) => <span key={i} className={i < s.hearts ? '' : 'off'}>❤️</span>)}</div>
       </Splash>
     )
@@ -145,7 +146,7 @@ export default function App() {
       <header>
         <div className="cls">
           <span className="av">🧑‍🚀</span>
-          <span><small>Welcome back</small><b>Princesam</b></span>
+          <span><small>Welcome back</small><b>{NAME}</b></span>
         </div>
         <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}><Icon name="flame" className="c-fire" /> {s.streak}</button>
         <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}><Icon name="heart" className="c-heart" /> {s.hearts}</button>
@@ -168,7 +169,7 @@ export default function App() {
                   : <span className="qbar"><i style={{ width: `${Math.min(100, (s.todayXp / QUEST_XP) * 100)}%` }} /><em>{Math.min(s.todayXp, QUEST_XP)} / {QUEST_XP}</em></span>}</span>
               {questDone && !claimed && <span className="go">OPEN</span>}
             </button>
-            {claimed && <button className="x qclose" aria-label="Hide quest card" onClick={() => set({ questHidden: day() })}>✕</button>}
+            {claimed && <button className="x qclose" aria-label="Hide quest card" onClick={() => set({ questHidden: day() })}><Icon name="close" /></button>}
             </div>}
             <Subjects cur={s.subject} set={set} />
             <button className="jump" aria-label="Jump to current lesson" onClick={() => document.querySelector('.node.current')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}><Icon name="pin" className="c-red" /></button>
@@ -180,23 +181,24 @@ export default function App() {
           const unlocked = ci === 0 || doneIn(ci - 1) >= LESSONS_PER_CHAPTER
           return (
             <section key={ch.title} className="scene">
-              <div className="banner" style={{ background: color }}>
-                <div><small>CHAPTER {ci + 1}</small><h3>{ch.title}</h3></div>
-                <span className="emo"><Icon name={ch.gen} /></span>
+              <div className="banner" style={{ '--c': color } as React.CSSProperties}>
+                <small>CHAPTER {ci + 1}</small><h3><Icon name={ch.gen} /> {ch.title}</h3>
               </div>
               <div className="path">
                 {Array.from({ length: LESSONS_PER_CHAPTER }, (_, step) => {
                   const open = unlocked && step <= done
+                  // book = teaching slides, question mark = chapter test (mixed review), pencil = practice questions
+                  const type = step === REVIEW ? 'test' : SLIDE_LESSONS[`${ch.gen}:${step}`] ? 'lesson' : 'practice'
                   return (
                     <button
                       key={step}
                       className={`node ${open ? '' : 'locked'} ${unlocked && step === done ? 'current' : ''}`}
                       style={{ marginLeft: OFFSETS[step], background: open ? color : undefined }}
                       disabled={!open}
-                      aria-label={`${ch.title} lesson ${step + 1}`}
+                      aria-label={`${ch.title} ${type} ${step + 1}${open ? '' : ' (locked)'}`}
                       onClick={() => setActive({ ci, step })}
                     >
-                      <Icon name={step < done ? 'check' : open ? (step === REVIEW ? 'dumbbell' : 'star') : 'lock'} />
+                      <Icon name={type} />
                       <span className="nstars" aria-label={`${s.best[`${key(ci)}:${step}`]?.stars ?? 0} of 3 stars`}>
                         {[1, 2, 3].map((n) => <i key={n} className={n <= (s.best[`${key(ci)}:${step}`]?.stars ?? 0) ? 'on' : ''}>★</i>)}
                       </span>
@@ -218,7 +220,7 @@ export default function App() {
                 <button key={ch.title} className="row" onClick={() => setLib({ ci })}>
                   <span className="emo"><Icon name={ch.gen} /></span>
                   <span className="grow">{ch.title}</span>
-                  <span>{doneIn(ci)}/{LESSONS_PER_CHAPTER}</span>
+                  <span>{doneIn(ci)}/{LESSONS_PER_CHAPTER}</span><Icon name="next" className="chev" />
                 </button>
               ))}
             </>
@@ -228,20 +230,20 @@ export default function App() {
           const open = (n: number) => (ci === 0 || doneIn(ci - 1) >= LESSONS_PER_CHAPTER) && n <= doneIn(ci)
           if (step === undefined) return (
             <>
-              <button className="back" onClick={() => setLib(null)}>‹ Chapters</button>
+              <button className="back" onClick={() => setLib(null)}><Icon name="prev" /> Chapters</button>
               <h2><Icon name={ch.gen} /> {ch.title}</h2>
               {Array.from({ length: LESSONS_PER_CHAPTER }, (_, n) => (
                 <button key={n} className="row" disabled={!open(n)} onClick={() => setLib({ ci, step: n })}>
                   <span className="emo"><Icon name={n < doneIn(ci) ? 'done' : open(n) ? 'star' : 'lock'} className={n < doneIn(ci) ? 'c-ok' : open(n) ? 'c-star' : ''} /></span>
                   <span className="grow">Lesson {n + 1}{n === REVIEW && ' · Mixed review'}</span>
-                  <span>›</span>
+                  <Icon name="next" className="chev" />
                 </button>
               ))}
             </>
           )
           return (
             <>
-              <button className="back" onClick={() => setLib({ ci })}>‹ {ch.title}</button>
+              <button className="back" onClick={() => setLib({ ci })}><Icon name="prev" /> {ch.title}</button>
               <h2>Lesson {step + 1}{step === REVIEW && ' · Mixed review'}</h2>
               <p className="fine">{step < doneIn(ci) ? 'Completed' : 'Not completed yet'}</p>
               <button className="btn big" onClick={() => setActive({ ci, step })}>{step < doneIn(ci) ? 'Replay lesson' : 'Start lesson'}</button>
@@ -262,9 +264,9 @@ export default function App() {
               {rows.map((e, i) => (
                 <div key={e.name}>
                   {i === PROMOTE && <div className="zone">Stay in {t.name}</div>}
-                  {i === SIZE - DEMOTE && s.league > 0 && <div className="zone bad">Demotion zone ⬇</div>}
+                  {i === SIZE - DEMOTE && s.league > 0 && <div className="zone bad">Demotion zone</div>}
                   <div className={`row ${e.me ? 'me' : ''}`}>
-                    <span className={i < PROMOTE ? 'up' : i >= SIZE - DEMOTE && s.league > 0 ? 'down' : ''}>{i + 1}</span>
+                    <span className={`rank ${i < PROMOTE ? 'up' : i >= SIZE - DEMOTE && s.league > 0 ? 'down' : ''}`}>{i + 1}</span>
                     <span className="grow">{e.me ? 'You' : e.name}</span><span><Icon name="bolt" className="c-star" /> {e.xp}</span>
                   </div>
                 </div>
@@ -278,7 +280,7 @@ export default function App() {
             <h2>Leaderboard</h2>
             {board.map((f, i) => (
               <div key={f.name} className={`row ${f.name === 'You' ? 'me' : ''}`}>
-                <span>{i + 1}</span><span className="emo">{f.e}</span>
+                <span className="rank">{i + 1}</span><span className="emo">{f.e}</span>
                 <span className="grow">{f.name}</span><span><Icon name="flame" className="c-fire" /> {f.streak} · <Icon name="bolt" className="c-star" /> {f.xp}</span>
               </div>
             ))}
@@ -288,7 +290,7 @@ export default function App() {
         {tab === 'profile' && (
           <div className="profile">
             <div className="huge">🧑‍🚀</div>
-            <h2>Little Learner</h2>
+            <h2>{NAME}</h2>
             <label className="row"><span className="grow">My class</span>
               <select aria-label="Class" value={s.cls} onChange={(e) => set({ cls: +e.target.value })}>
                 {CLASSES.map((n, i) => <option key={n} value={i}>{n}</option>)}

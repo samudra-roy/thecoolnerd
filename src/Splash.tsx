@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
+import { Icon } from './Icon'
 
 // Full-screen celebration layout shared by the streak page and achievement pages.
 export default function Splash(p: { bubble: string; hero: ReactNode; big: string; caption?: string; dim?: boolean; children?: ReactNode; btn: string; onClick: () => void; onClose?: () => void }) {
   return (
     <div className="splash">
-      {p.onClose && <button className="x close" aria-label="Close" onClick={p.onClose}>✕</button>}
+      {p.onClose && <button className="x close" aria-label="Close" onClick={p.onClose}><Icon name="close" /></button>}
       <div className="bubble">{p.bubble}</div>
       <div className={`hero ${p.dim ? 'dim' : ''}`} aria-hidden>{p.hero}</div>
       <div className="num">{p.big}</div>
@@ -25,7 +26,7 @@ export function WeekStrip({ streak }: { streak: number }) {
       {DAYS.map((d, k) => {
         const ago = idx - k // days before today; negative = future
         const on = ago >= 0 && ago < streak
-        return <div key={d} className={ago === 0 ? 'today' : ''}><small>{d}</small><i className={on ? 'on' : ''}>{on ? '✓' : ''}</i></div>
+        return <div key={d} className={ago === 0 ? 'today' : ''}><small>{d}</small><i className={on ? 'on' : ''}>{on && <Icon name="check" />}</i></div>
       })}
     </div>
   )
