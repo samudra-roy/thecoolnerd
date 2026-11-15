@@ -117,3 +117,13 @@ export const GENS: Record<string, Gen> = {
 
 // 10 questions per lesson
 export const makeLesson = (gen: string, s: number): Q[] => Array.from({ length: 10 }, () => GENS[gen](s))
+
+// revision mix: picks chapters by weight (stale chapters weigh more)
+export const makeMix = (items: { gen: string; w: number }[], s: number): Q[] => {
+  const total = items.reduce((a, x) => a + x.w, 0)
+  return Array.from({ length: 10 }, () => {
+    let n = Math.random() * total
+    const it = items.find((x) => (n -= x.w) < 0) ?? items[0]
+    return GENS[it.gen](s)
+  })
+}

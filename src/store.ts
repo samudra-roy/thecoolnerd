@@ -1,16 +1,29 @@
 import { useEffect, useState } from 'react'
+import { totalXp, type Best, type Result } from './xp'
 
 export type State = {
   cls: number
   subject: string
-  xp: number
   streak: number
   lastDay: string
   done: Record<string, number> // "maths:cls:chapter" -> lessons finished
+  last: Record<string, string> // chapter key -> last day practiced (drives revision)
+  best: Record<string, Best> // lessonId -> { first-run time XP, best stars }
+  hearts: number // stored count; use the live value from useStore
+  heartAt: number // when the next regen hour started counting
 }
+export const MAX_HEARTS = 5
+const HOUR = 36e5
 const KEY = 'thecoolnerd-v1'
-const fresh: State = { cls: 4, subject: 'maths', xp: 0, streak: 0, lastDay: '', done: {} }
-const day = (offset = 0) => new Date(Date.now() - offset * 864e5).toLocaleDateString('en-CA')
+const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0 }
+// 1 heart per hour; the clock only runs while below max
+const regen = (o: State, now: number) => {
+  if (o.hearts >= MAX_HEARTS) return { hearts: MAX_HEARTS, heartAt: now }
+  const n = Math.floor((now - o.heartAt) / HOUR)
+  const hearts = Math.min(MAX_HEARTS, o.hearts + n)
+  return { hearts, heartAt: hearts >= MAX_HEARTS ? now : o.heartAt + n * HOUR }
+}
+export const day = (offset = 0) => new Date(Date.now() - offset * 864e5).toLocaleDateString('en-CA')
 
 // Dummy backend: localStorage. Swap load/save for Supabase calls later.
 const load = (): State => {
@@ -21,14 +34,24 @@ export function useStore() {
   const [s, setS] = useState<State>(load)
   useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(s)) } catch { /* private mode */ } }, [s])
   // a missed day resets the streak on display
+  const [now, setNow] = useState(Date.now())
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(t) }, [])
+  const h = regen(s, now)
   const live = s.lastDay === day() || s.lastDay === day(1) ? s.streak : 0
   return {
-    s: { ...s, streak: live },
+    s: { ...s, streak: live, xp: totalXp(s.best), hearts: h.hearts, nextHeartMs: h.hearts >= MAX_HEARTS ? 0 : h.heartAt + HOUR - now },
+    loseHeart: () => setS((o) => { const r = regen(o, Date.now()); return { ...o, hearts: Math.max(0, r.hearts - 1), heartAt: r.heartAt } }),
+    // shortcut: ad watch is simulated, wire a real ad SDK before release
+    refillHearts: () => setS((o) => ({ ...o, hearts: MAX_HEARTS, heartAt: Date.now() })),
     set: (p: Partial<State>) => setS((o) => ({ ...o, ...p })),
-    finish(key: string, step: number, xp: number) {
-      setS((o) => {
-        const streak = o.lastDay === day() ? o.streak : o.lastDay === day(1) ? o.streak + 1 : 1
-        return { ...o, xp: o.xp + xp, streak, lastDay: day(), done: { ...o.done, [key]: Math.max(o.done[key] || 0, step + 1) } }
+    finish(touched: string[], r: Result, o: { id?: string; progress?: { key: string; step: number } } = {}) {
+      setS((old) => {
+        const streak = old.lastDay === day() ? old.streak : old.lastDay === day(1) ? old.streak + 1 : 1
+        const last = { ...old.last }
+        touched.forEach((k) => (last[k] = day()))
+        const done = o.progress ? { ...old.done, [o.progress.key]: Math.max(old.done[o.progress.key] || 0, o.progress.step + 1) } : old.done
+        const best = o.id && r.next ? { ...old.best, [o.id]: r.next } : old.best
+        return { ...old, streak, lastDay: day(), done, last, best }
       })
     },
   }

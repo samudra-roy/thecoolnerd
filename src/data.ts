@@ -2,8 +2,9 @@ export const CLASSES = ['Pre-Nursery', 'Nursery', 'LKG', 'UKG', ...Array.from({ 
 
 export const SUBJECTS = [
   { id: 'maths', name: 'Maths', emoji: '🧮' },
-  { id: 'english', name: 'English', emoji: '📖', soon: true },
   { id: 'science', name: 'Science', emoji: '🔬', soon: true },
+  { id: 'english', name: 'English', emoji: '📖', soon: true },
+  { id: 'cs', name: 'Computer Science', emoji: '💻', soon: true },
 ]
 
 export type Chapter = { title: string; emoji: string; gen: string }

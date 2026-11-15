@@ -1,44 +1,131 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
-:root { --green:#58cc02; --green-d:#58a700; --red:#ff4b4b; --red-d:#ea2b2b; --line:#e5e5e5; --text:#4b4b4b; --muted:#afafaf }
+:root {
+  --bg:#fff; --card:#fff; --line:#e5e5e5; --text:#4b4b4b; --muted:#afafaf;
+  --green:#58cc02; --green-d:#58a700; --btn-text:#fff; --red:#ff4b4b; --red-d:#ea2b2b;
+  --blue:#1899d6; --blue-l:#ddf4ff; --blue-b:#84d8ff;
+  --sun-l:#fff4d6; --sun-b:#ffc800; --sun-t:#a37d00;
+  --ok-bg:#d7ffb8; --ok-t:#58a700; --bad-bg:#ffdfe0; --bad-t:#ea2b2b;
+  --lock:#e5e5e5; --lock-d:#cfcfcf; --dis:#e5e5e5; --dis-t:#afafaf;
+}
+/* Dark mode follows the phone setting, like the Duolingo recording */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#131f24; --card:#131f24; --line:#37464f; --text:#e5eef2; --muted:#8aa0ab;
+    --green:#89e219; --green-d:#58a700; --btn-text:#131f24;
+    --blue:#49c0f8; --blue-l:#202f36; --blue-b:#49c0f8;
+    --sun-l:#2f2a12; --sun-t:#ffd24d;
+    --ok-bg:#1c3a14; --ok-t:#89e219; --bad-bg:#3b1d20; --bad-t:#ff6b6b;
+    --lock:#37464f; --lock-d:#25323a; --dis:#37464f; --dis-t:#52656d;
+  }
+}
 * { box-sizing: border-box }
-body { margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); font-family: Nunito, system-ui, sans-serif; font-weight: 800; color: var(--text); background: #fff }
+body { margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); font-family: Nunito, system-ui, sans-serif; font-weight: 800; color: var(--text); background: var(--bg) }
 button, select, input { font: inherit; color: inherit }
 .app, .lesson { max-width: 520px; margin: 0 auto; min-height: 100vh }
-header { position: sticky; top: 0; z-index: 2; background: #fff; display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 2px solid var(--line) }
-header select { flex: 1; padding: 10px; border: 2px solid var(--line); border-radius: 14px; background: #fff; font-weight: 900 }
+header { position: sticky; top: 0; z-index: 3; background: var(--bg); display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 2px solid var(--line) }
 .stat { font-weight: 900; font-size: 18px }
-.subjects { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto }
-.chip { padding: 8px 14px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; background: #fff; white-space: nowrap; cursor: pointer }
-.chip.on { border-color: #84d8ff; background: #ddf4ff; color: #1899d6 }
+.cls { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0 }
+.cls span:last-child { display: flex; flex-direction: column; line-height: 1.15; min-width: 0 }
+.cls small { font-size: 13px; font-weight: 700; color: var(--muted) }
+.cls b { font-size: 20px; font-weight: 900; color: var(--green-d); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.av { width: 44px; height: 44px; flex: none; display: grid; place-items: center; font-size: 26px; border-radius: 50%; background: var(--blue-l); border: 2px solid var(--blue-b) }
+.subjects { display: flex; gap: 8px; padding: 0; overflow-x: auto }
+.chip { padding: 8px 14px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; background: var(--card); white-space: nowrap; cursor: pointer }
+.chip.on { border-color: var(--blue-b); background: var(--blue-l); color: var(--blue) }
 .chip:disabled { opacity: .5; cursor: not-allowed }
-main { padding: 0 16px 80px }
-.banner { display: flex; justify-content: space-between; align-items: center; color: #fff; padding: 14px 18px; border-radius: 18px; margin-top: 24px }
+main { padding: 0 16px 100px }
+h2 { font-size: 18px; margin: 20px 0 10px }
+
+/* chapter card sticks under the header; the next chapter's card slides over it */
+.banner { position: sticky; top: 62px; z-index: 2; display: flex; justify-content: space-between; align-items: center; color: #fff; padding: 14px 18px; border-radius: 18px; box-shadow: 0 5px 0 rgba(0,0,0,.22) }
 .banner h3 { margin: 2px 0 0; font-size: 20px } .banner small { opacity: .85; letter-spacing: 1px }
 .emo { font-size: 38px }
-.path { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 0 }
-.node { width: 72px; height: 72px; border-radius: 50%; border: 0; font-size: 28px; color: #fff; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,.2); transition: transform .1s }
-.node:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.2) }
-.node.locked { background: #e5e5e5; color: var(--muted); box-shadow: 0 6px 0 #cfcfcf; cursor: not-allowed }
-.btn { border: 0; border-radius: 16px; padding: 14px 24px; font-weight: 900; letter-spacing: .5px; text-transform: uppercase; color: #fff; background: var(--green); box-shadow: 0 4px 0 var(--green-d); cursor: pointer }
-.btn.red { background: var(--red); box-shadow: 0 4px 0 var(--red-d) }
-.btn:disabled { background: #e5e5e5; color: var(--muted); box-shadow: 0 4px 0 #cfcfcf; cursor: not-allowed }
+/* home only: grass, and one tall looping map (public/world.svg from scripts/gen-scenes.mjs) behind all chapters.
+   every chapter is exactly 760px with its path at the bottom, so the baked-in road always passes through the nodes */
+main.world { background: #9fdc78 }
+.trail { margin: 0 -16px; padding: 0 16px; background: url(/world.svg) center top / auto 2280px repeat-y }
+.scene { height: 760px; display: flex; flex-direction: column; padding-top: 24px }
+.path { display: flex; flex-direction: column; align-items: center; gap: 50px; padding: 40px 0 28px; margin-top: auto }
+.node { position: relative; width: 72px; height: 72px; border-radius: 50%; border: 0; font-size: 28px; color: #fff; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,.25); transition: transform .1s, box-shadow .1s }
+.node:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.25) }
+.node.locked { background: var(--lock); color: var(--muted); box-shadow: 0 6px 0 var(--lock-d); cursor: not-allowed }
+/* the lesson you are on: pulsing ring + bouncing START bubble */
+.node.current { animation: ring 1.6s ease-out infinite }
+.node.current::after { content: 'START'; position: absolute; left: 50%; top: -46px; translate: -50% 0; padding: 6px 12px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); color: var(--green); font-size: 14px; letter-spacing: .5px; animation: bob 1s ease-in-out infinite }
+.node.current::before { content: ''; position: absolute; left: 50%; top: -14px; width: 12px; height: 12px; translate: -50% 0; rotate: 45deg; background: var(--card); border-right: 2px solid var(--line); border-bottom: 2px solid var(--line); z-index: 1; animation: bob 1s ease-in-out infinite }
+
+.btn { border: 0; border-radius: 16px; padding: 14px 24px; font-weight: 900; letter-spacing: .5px; text-transform: uppercase; color: var(--btn-text); background: var(--green); box-shadow: 0 4px 0 var(--green-d); cursor: pointer }
+.btn.red { background: var(--red); color: #fff; box-shadow: 0 4px 0 var(--red-d) }
+.btn:disabled { background: var(--dis); color: var(--dis-t); box-shadow: 0 4px 0 var(--lock-d); cursor: not-allowed }
 .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.2) }
+.btn.alt { background: none; color: var(--green); border: 2px solid var(--green); box-shadow: 0 4px 0 var(--line) }
+.back { border: 0; background: none; color: var(--blue); font-weight: 900; font-size: 16px; padding: 12px 0 0; cursor: pointer }
+.row:disabled { opacity: .5; cursor: not-allowed }
 .btn.big { width: 100%; padding: 16px }
+
 .lesson { display: flex; flex-direction: column }
-.lbar { display: flex; align-items: center; gap: 14px; padding: 18px 16px }
+.lbar { display: flex; align-items: center; gap: 14px; padding: 26px 16px 18px }
 .x { background: none; border: 0; font-size: 22px; color: var(--muted); cursor: pointer }
-.progress { flex: 1; height: 16px; background: var(--line); border-radius: 8px; overflow: hidden }
-.progress i { display: block; height: 100%; background: var(--green); border-radius: 8px; transition: width .3s }
-.hearts { color: var(--red); font-weight: 900 }
+.pwrap { position: relative; flex: 1 }
+.combo { position: absolute; top: -18px; left: 2px; font-size: 11px; letter-spacing: 1px; color: var(--green); animation: pop .25s ease-out }
+.progress { height: 16px; background: var(--line); border-radius: 8px; overflow: hidden }
+.progress i { position: relative; display: block; height: 100%; background: var(--green); border-radius: 8px; transition: width .4s cubic-bezier(.3,1.4,.5,1) }
+.progress i::after { content: ''; position: absolute; left: 8px; right: 8px; top: 3px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.35) } /* the glossy highlight */
+.hearts { color: var(--red); font-weight: 900; font-size: 14px; white-space: nowrap }
 .qbody { flex: 1; padding: 16px; text-align: center }
 .qbody h2 { font-size: 26px; margin: 8px 0 }
 .visual { font-size: 40px; line-height: 1.3; margin: 16px 0; word-break: break-all }
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px }
-.opt { padding: 22px 8px; font-size: 22px; background: #fff; border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 16px; cursor: pointer }
-.opt.sel { border-color: #84d8ff; background: #ddf4ff; color: #1899d6 }
-.ans { width: 100%; margin-top: 24px; padding: 18px; font-size: 24px; text-align: center; border: 2px solid var(--line); border-radius: 16px }
+.opt { padding: 22px 8px; font-size: 22px; background: var(--card); border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 16px; cursor: pointer; animation: pop .3s ease-out backwards }
+.opt:nth-child(2) { animation-delay: .05s } .opt:nth-child(3) { animation-delay: .1s } .opt:nth-child(4) { animation-delay: .15s }
+.opt:active:not(:disabled) { transform: translateY(3px); border-bottom-width: 2px; margin-bottom: 3px }
+.opt.sel { border-color: var(--blue-b); background: var(--blue-l); color: var(--blue) }
+.opt.sel.ok { border-color: var(--green); background: var(--ok-bg); color: var(--ok-t) }
+.opt.sel.bad { border-color: var(--red); background: var(--bad-bg); color: var(--bad-t); animation: shake .35s }
+.ans { width: 100%; margin-top: 24px; padding: 18px; font-size: 24px; text-align: center; background: var(--card); border: 2px solid var(--line); border-radius: 16px }
+/* feedback sheet slides up from the bottom */
 .foot { padding: 16px; border-top: 2px solid var(--line) }
-.foot.ok { background: #d7ffb8; color: var(--green-d) } .foot.bad { background: #ffdfe0; color: var(--red-d) }
+.foot.ok, .foot.bad { animation: slideUp .25s ease-out }
+.foot.ok { background: var(--ok-bg); color: var(--ok-t) } .foot.bad { background: var(--bad-bg); color: var(--bad-t) }
 .msg { font-size: 20px; font-weight: 900; margin-bottom: 12px }
+
 .end { align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px }
+.end > * { animation: pop .4s ease-out backwards } .end > :nth-child(2) { animation-delay: .1s } .end > :nth-child(3) { animation-delay: .2s } .end > :nth-child(4) { animation-delay: .3s }
+.end h1 { margin: 0 0 8px; color: var(--sun-t) }
 .huge { font-size: 96px }
+.boxes { display: flex; gap: 10px; width: 100% }
+.box { flex: 1; border: 2px solid; border-radius: 14px; overflow: hidden; background: var(--card) }
+.box small { display: block; padding: 4px 0; color: #fff; font-size: 11px; letter-spacing: 1px }
+.box b { display: block; padding: 12px 4px; font-size: 20px }
+.box.xp { border-color: var(--sun-b) } .box.xp small { background: var(--sun-b); color: #7a5b00 }
+.box.st { border-color: var(--blue-b) } .box.st small { background: var(--blue-b); color: #0b4a68 }
+.box.tm { border-color: var(--green) } .box.tm small { background: var(--green); color: var(--btn-text) }
+.fine { margin: 4px 0 16px; color: var(--muted); font-size: 14px }
+.flame { font-size: 120px; animation: flicker 1.2s ease-in-out infinite !important }
+.bignum { font-size: 80px; font-weight: 900; color: #ff9600; line-height: 1 }
+
+.pick { width: 100%; padding: 12px; border: 2px solid var(--line); border-radius: 14px; background: var(--card) }
+.row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px; margin-bottom: 10px; background: var(--card); border: 2px solid var(--line); border-radius: 16px; text-align: left; cursor: pointer }
+.row.me { background: var(--blue-l); border-color: var(--blue-b) }
+.row .emo { font-size: 28px } .grow { flex: 1 }
+.row select { border: 0; background: none; font-weight: 900; text-align: right }
+.row select option { color: #111 }
+.profile { text-align: center } .profile .row { text-align: left; cursor: default } .profile .btn { margin-top: 16px }
+
+.tabs { position: fixed; z-index: 4; bottom: 0; left: 0; right: 0; max-width: 520px; margin: 0 auto; display: flex; gap: 4px; padding: 6px 10px calc(6px + env(safe-area-inset-bottom)); background: var(--bg); border-top: 2px solid var(--line) }
+.tabs button { flex: 1; display: flex; justify-content: center; padding: 8px 0; border: 2px solid transparent; border-radius: 14px; background: none; cursor: pointer }
+.tabs button span { font-size: 28px; filter: grayscale(1); opacity: .65; transition: transform .15s }
+.tabs button.on { border-color: var(--blue-b); background: var(--blue-l) }
+.tabs button.on span { filter: none; opacity: 1; transform: scale(1.1) }
+
+.daily { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 16px; padding: 16px; text-align: left; background: var(--sun-l); border: 2px solid var(--sun-b); border-bottom-width: 5px; border-radius: 18px; cursor: pointer }
+.daily small { color: var(--sun-t) } .go { color: var(--btn-text); background: var(--green); padding: 8px 14px; border-radius: 12px; font-weight: 900 }
+.subjects { margin: 14px 0 0 }
+
+@keyframes pop { from { transform: scale(.85); opacity: 0 } 70% { transform: scale(1.04) } }
+@keyframes slideUp { from { transform: translateY(100%) } }
+@keyframes shake { 20% { transform: translateX(-6px) } 40% { transform: translateX(6px) } 60% { transform: translateX(-4px) } 80% { transform: translateX(4px) } }
+@keyframes bob { 50% { transform: translateY(-5px) } }
+@keyframes ring { 0% { box-shadow: 0 6px 0 rgba(0,0,0,.25), 0 0 0 0 rgba(137,226,25,.55) } 100% { box-shadow: 0 6px 0 rgba(0,0,0,.25), 0 0 0 14px rgba(137,226,25,0) } }
+@keyframes flicker { 0%, 100% { transform: scale(1) rotate(-3deg) } 50% { transform: scale(1.08) rotate(3deg) } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important } }

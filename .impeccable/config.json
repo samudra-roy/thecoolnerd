@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "src/index.css"
+        ],
+        "createdAt": "2026-11-15T07:14:08.122Z",
+        "reason": "assistant: CSS border-triangle speech-bubble tail, not an accent border"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/index.css"
+        ],
+        "createdAt": "2026-11-15T07:14:08.795Z",
+        "reason": "assistant: black comic panel divider on active tab, not a colored accent stripe"
+      }
+    ]
+  }
+}
