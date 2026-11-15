@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { Result } from './xp'
-import { Burst, CountUp, End, Visual, clock } from './Lesson'
+import { Burst, CountUp, End, Stars, Visual, clock } from './Lesson'
+import { Icon } from './Icon'
 import type { Slide } from './slides'
 
 type Props = {
@@ -39,8 +40,8 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
     return (
       <End emoji={r.stars === 3 ? '🦉' : '🏆'} head={r.stars === 3 ? 'Perfect lesson!' : 'Lesson complete!'} btn="Claim XP" onClick={() => onDone(r)}>
         <div className="boxes">
-          <div className="box xp"><small>XP</small><b>⚡ <CountUp to={r.gained} /></b></div>
-          <div className="box st"><small>STARS</small><b>{'⭐'.repeat(r.stars) || '—'}</b></div>
+          <div className="box xp"><small>XP</small><b><Icon name="bolt" className="c-star" /> <CountUp to={r.gained} /></b></div>
+          <div className="box st"><small>STARS</small><b><Stars n={r.stars} /></b></div>
           <div className="box tm"><small>TIME</small><b>{clock(secs)}</b></div>
         </div>
         <p className="fine">Speed +{r.timeXp} · Slides +{r.slideXp ?? 0} · Stars +{r.starXp}</p>
@@ -72,7 +73,7 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
             <i style={{ width: `${(i / slides.length) * 100}%` }} />
           </div>
         </div>
-        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}>❤️ {hearts}</span>
+        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}><Icon name="heart" /> {hearts}</span>
       </div>
 
       <div className="qbody">
@@ -91,7 +92,7 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
                 <button key={o} className={`opt ${pick === o ? 'sel' : ''} ${pick === o ? result : ''}`} disabled={result === 'ok'} onClick={() => { setPick(o); setResult('') }}>{o}{pick === o && result === 'ok' && <Burst />}</button>
               ))}
             </div>
-            <button className="back" onClick={() => setHint(true)}>💡 Hint</button>
+            <button className="back" onClick={() => setHint(true)}><Icon name="bulb" /> Hint</button>
             {hint && <p className="fine">{s.hint}</p>}
           </>
         )}

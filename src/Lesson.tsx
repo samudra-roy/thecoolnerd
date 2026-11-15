@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Q } from './questions'
 import type { Result } from './xp'
+import { Icon } from './Icon'
 
 type Props = {
   make: () => Q[]
@@ -33,7 +34,8 @@ export function CountUp({ to }: { to: number }) {
 export const Visual = ({ v, pop }: { v: string; pop?: boolean }) => (
   <div className={`visual ${pop ? 'pop' : ''}`} aria-hidden>{v.split(/\s+/).map((g, i) => <span key={i}>{g}</span>)}</div>
 )
-export const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+export const Stars = ({ n }: { n: number }) => <>{n ? Array.from({ length: n }, (_, i) => <Icon key={i} name="star" className="c-star" />) : '—'}</>
+export const clock =(s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
 export default function Lesson({ make, title, award, hearts, nextHeartMs, onWrong, onRefill, onExit, onDone }: Props) {
   const [queue, setQueue] = useState<Q[]>(make)
@@ -64,8 +66,8 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
     return (
       <End emoji={r.stars === 3 ? '🦉' : '🏆'} head={r.stars === 3 ? 'Perfect lesson!' : 'Lesson complete!'} btn="Claim XP" onClick={() => onDone(r)}>
         <div className="boxes">
-          <div className="box xp"><small>XP</small><b>⚡ <CountUp to={r.gained} /></b></div>
-          <div className="box st"><small>STARS</small><b>{'⭐'.repeat(r.stars) || '—'}</b></div>
+          <div className="box xp"><small>XP</small><b><Icon name="bolt" className="c-star" /> <CountUp to={r.gained} /></b></div>
+          <div className="box st"><small>STARS</small><b><Stars n={r.stars} /></b></div>
           <div className="box tm"><small>TIME</small><b>{clock(secs)}</b></div>
         </div>
         <p className="fine">Speed +{r.timeXp} · Stars +{r.starXp}</p>
@@ -103,7 +105,7 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
             <i style={{ width: `${correct * 10}%` }} />
           </div>
         </div>
-        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}>⏱ {clock(secs)} · ❤️ {hearts}</span>
+        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}><Icon name="clock" /> {clock(secs)} · <Icon name="heart" /> {hearts}</span>
       </div>
 
       <div className="qbody">

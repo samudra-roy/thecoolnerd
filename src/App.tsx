@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CLASSES, LESSONS_PER_CHAPTER, SUBJECTS, chaptersFor, scale } from './data'
 import { MAX_HEARTS, day, useStore } from './store'
 import { makeLesson, makeMix } from './questions'
 import { dailyResult, lessonResult } from './xp'
 import Lesson, { Burst } from './Lesson'
 import SlideLesson from './SlideLesson'
+import Login from './Login'
 import { ACHIEVEMENTS } from './achievements'
 import Splash, { WeekStrip } from './Splash'
+import { Icon } from './Icon'
 import { DEMOTE, PROMOTE, SIZE, TIERS, board as leagueBoard, daysLeft, weekProgress } from './league'
 import { SLIDE_LESSONS, SLIDE_XP } from './slides'
 
@@ -14,7 +16,7 @@ const COLORS = ['#58cc02', '#1cb0f6', '#ce82ff', '#ff9600', '#ff86d0']
 const QUEST_XP = 30 // daily quest goal
 const CHEST_XP = 20 // reward, stored as a best entry so totalXp picks it up
 const OFFSETS = [-30, 20, 50, 10, -40]
-const TABS = [['home', '🏠', 'Home'], ['library', '📚', 'Library'], ['league', '🏆', 'League'], ['friends', '👫', 'Friends'], ['profile', '🙂', 'Profile']] as const
+const TABS = [['home', 'Home'], ['library', 'Library'], ['league', 'League'], ['friends', 'Friends'], ['profile', 'Profile']] as const
 type Tab = (typeof TABS)[number][0]
 // dummy friends; replace with a Supabase query later
 const FRIENDS = [{ name: 'Aarav', e: '🦁', xp: 420, streak: 12 }, { name: 'Diya', e: '🦄', xp: 310, streak: 5 }, { name: 'Kabir', e: '🐼', xp: 150, streak: 2 }]
@@ -23,7 +25,7 @@ const Subjects = ({ cur, set }: { cur: string; set: (p: { subject: string }) => 
   <nav className="subjects">
     {SUBJECTS.map((x) => (
       <button key={x.id} disabled={x.soon} className={`chip ${cur === x.id ? 'on' : ''}`} onClick={() => set({ subject: x.id })}>
-        {x.emoji} {x.name}{x.soon && <small> soon</small>}
+<Icon name={x.id} /> {x.name}{x.soon && <small> soon</small>}
       </button>
     ))}
   </nav>
@@ -50,6 +52,15 @@ export default function App() {
   const mixOf = (idx: number[], boost = 0) => () => makeMix(idx.map((ci) => ({ gen: chapters[ci].gen, w: weight(ci) + (ci === idx[idx.length - 1] ? boost : 0) })), scale(s.cls, 2))
 
   const finished = () => { if (s.lastDay !== day()) setCelebrate(s.streak + 1); setActive(null) }
+
+  const earned = (a: (typeof ACHIEVEMENTS)[number]) => a.earned({ ...s, bestStreak: Math.max(s.bestStreak, s.streak) })
+  // stamp the time each achievement is first seen earned, so the profile can show newest first
+  const unstamped = ACHIEVEMENTS.filter((a) => earned(a) && !s.gotAt[a.id]).map((a) => a.id).join()
+  useEffect(() => { if (unstamped) set({ gotAt: { ...s.gotAt, ...Object.fromEntries(unstamped.split(',').map((id) => [id, Date.now()])) } }) }, [unstamped]) // eslint-disable-line react-hooks/exhaustive-deps
+  // earned newest first (same-time ties: harder ones, later in the list, first), then locked in list order
+  const achs = ACHIEVEMENTS.map((a, i) => ({ a, i, t: earned(a) ? s.gotAt[a.id] || Infinity : 0 })).sort((x, y) => y.t - x.t || (x.t ? y.i - x.i : x.i - y.i))
+
+  if (!s.user) return <Login onLogin={(user) => set({ user })} />
 
   if (active) {
     if (active === 'daily') {
@@ -121,7 +132,6 @@ export default function App() {
     )
   }
 
-  const earned = (a: (typeof ACHIEVEMENTS)[number]) => a.earned({ ...s, bestStreak: Math.max(s.bestStreak, s.streak) })
   const badge = ACHIEVEMENTS.find((a) => a.id === badgeId)
   if (badge) return (
     <Splash bubble={earned(badge) ? 'You earned this badge. Well done!' : badge.desc} hero={badge.emoji} dim={!earned(badge)}
@@ -137,22 +147,22 @@ export default function App() {
           <span className="av">🧑‍🚀</span>
           <span><small>Welcome back</small><b>Princesam</b></span>
         </div>
-        <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}>🔥 {s.streak}</button>
-        <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}>❤️ {s.hearts}</button>
+        <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}><Icon name="flame" className="c-fire" /> {s.streak}</button>
+        <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}><Icon name="heart" className="c-heart" /> {s.hearts}</button>
       </header>
 
       <main key={tab} className={tab === 'home' ? 'world' : undefined}>
         {tab === 'home' && (
           <>
             <button className="daily" onClick={() => setActive('daily')}>
-              <span className="emo">🎯</span>
+              <span className="emo c-red"><Icon name="target" /></span>
               <span className="grow"><b>Daily practice</b><br /><small>{nextSet < 0 ? 'All 3 perfect! Bonus set (no XP)' : `Set ${nextSet + 1} of 3 · revises what you learned`}</small><br />
-                <small>{setStars.map((n) => (n ? '⭐'.repeat(n) : '☆')).join('  ·  ')}</small></span>
+                <small className="setstars">{setStars.map((n, i) => <span key={i}>{n ? Array.from({ length: n }, (_, j) => <Icon key={j} name="star" className="c-star" />) : <Icon name="star" />}</span>)}</small></span>
               <span className="go">{nextSet < 0 ? 'BONUS' : 'START'}</span>
             </button>
             {s.questHidden !== day() && <div className="qwrap">
             <button className="daily quest" disabled={!questDone || claimed} onClick={() => setChest('shut')}>
-              <span className={`emo ${questDone && !claimed ? 'wiggle' : ''}`}>{claimed ? '✅' : '🎁'}</span>
+              <span className={`emo ${questDone && !claimed ? 'wiggle' : ''}`}><Icon name={claimed ? 'done' : 'gift'} className={claimed ? 'c-ok' : 'c-pink'} /></span>
               <span className="grow"><b>{claimed ? 'Quest complete!' : `Daily quest: earn ${QUEST_XP} XP`}</b>
                 {claimed ? <><br /><small>New quest tomorrow</small></>
                   : <span className="qbar"><i style={{ width: `${Math.min(100, (s.todayXp / QUEST_XP) * 100)}%` }} /><em>{Math.min(s.todayXp, QUEST_XP)} / {QUEST_XP}</em></span>}</span>
@@ -161,7 +171,7 @@ export default function App() {
             {claimed && <button className="x qclose" aria-label="Hide quest card" onClick={() => set({ questHidden: day() })}>✕</button>}
             </div>}
             <Subjects cur={s.subject} set={set} />
-            <button className="jump" aria-label="Jump to current lesson" onClick={() => document.querySelector('.node.current')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>📍</button>
+            <button className="jump" aria-label="Jump to current lesson" onClick={() => document.querySelector('.node.current')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}><Icon name="pin" className="c-red" /></button>
           </>
         )}
         {tab === 'home' && <div className="trail">{chapters.map((ch, ci) => {
@@ -172,7 +182,7 @@ export default function App() {
             <section key={ch.title} className="scene">
               <div className="banner" style={{ background: color }}>
                 <div><small>CHAPTER {ci + 1}</small><h3>{ch.title}</h3></div>
-                <span className="emo">{ch.emoji}</span>
+                <span className="emo"><Icon name={ch.gen} /></span>
               </div>
               <div className="path">
                 {Array.from({ length: LESSONS_PER_CHAPTER }, (_, step) => {
@@ -186,7 +196,7 @@ export default function App() {
                       aria-label={`${ch.title} lesson ${step + 1}`}
                       onClick={() => setActive({ ci, step })}
                     >
-                      {step < done ? '✓' : open ? (step === REVIEW ? '🏋️' : '★') : '🔒'}
+                      <Icon name={step < done ? 'check' : open ? (step === REVIEW ? 'dumbbell' : 'star') : 'lock'} />
                       <span className="nstars" aria-label={`${s.best[`${key(ci)}:${step}`]?.stars ?? 0} of 3 stars`}>
                         {[1, 2, 3].map((n) => <i key={n} className={n <= (s.best[`${key(ci)}:${step}`]?.stars ?? 0) ? 'on' : ''}>★</i>)}
                       </span>
@@ -206,7 +216,7 @@ export default function App() {
               <h2>Chapters</h2>
               {chapters.map((ch, ci) => (
                 <button key={ch.title} className="row" onClick={() => setLib({ ci })}>
-                  <span className="emo">{ch.emoji}</span>
+                  <span className="emo"><Icon name={ch.gen} /></span>
                   <span className="grow">{ch.title}</span>
                   <span>{doneIn(ci)}/{LESSONS_PER_CHAPTER}</span>
                 </button>
@@ -219,10 +229,10 @@ export default function App() {
           if (step === undefined) return (
             <>
               <button className="back" onClick={() => setLib(null)}>‹ Chapters</button>
-              <h2>{ch.emoji} {ch.title}</h2>
+              <h2><Icon name={ch.gen} /> {ch.title}</h2>
               {Array.from({ length: LESSONS_PER_CHAPTER }, (_, n) => (
                 <button key={n} className="row" disabled={!open(n)} onClick={() => setLib({ ci, step: n })}>
-                  <span className="emo">{n < doneIn(ci) ? '✅' : open(n) ? '⭐' : '🔒'}</span>
+                  <span className="emo"><Icon name={n < doneIn(ci) ? 'done' : open(n) ? 'star' : 'lock'} className={n < doneIn(ci) ? 'c-ok' : open(n) ? 'c-star' : ''} /></span>
                   <span className="grow">Lesson {n + 1}{n === REVIEW && ' · Mixed review'}</span>
                   <span>›</span>
                 </button>
@@ -255,7 +265,7 @@ export default function App() {
                   {i === SIZE - DEMOTE && s.league > 0 && <div className="zone bad">Demotion zone ⬇</div>}
                   <div className={`row ${e.me ? 'me' : ''}`}>
                     <span className={i < PROMOTE ? 'up' : i >= SIZE - DEMOTE && s.league > 0 ? 'down' : ''}>{i + 1}</span>
-                    <span className="grow">{e.me ? 'You' : e.name}</span><span>⚡ {e.xp}</span>
+                    <span className="grow">{e.me ? 'You' : e.name}</span><span><Icon name="bolt" className="c-star" /> {e.xp}</span>
                   </div>
                 </div>
               ))}
@@ -269,7 +279,7 @@ export default function App() {
             {board.map((f, i) => (
               <div key={f.name} className={`row ${f.name === 'You' ? 'me' : ''}`}>
                 <span>{i + 1}</span><span className="emo">{f.e}</span>
-                <span className="grow">{f.name}</span><span>🔥 {f.streak} · ⚡ {f.xp}</span>
+                <span className="grow">{f.name}</span><span><Icon name="flame" className="c-fire" /> {f.streak} · <Icon name="bolt" className="c-star" /> {f.xp}</span>
               </div>
             ))}
           </>
@@ -284,28 +294,28 @@ export default function App() {
                 {CLASSES.map((n, i) => <option key={n} value={i}>{n}</option>)}
               </select>
             </label>
-            <div className="badges stats">
-              <div className="badge on"><span>🔥</span><b>{s.streak}</b><small>Day streak</small></div>
-              <div className="badge on"><span>⚡</span><b>{s.xp}</b><small>Total XP</small></div>
-              <div className="badge on"><span>{TIERS[s.league].emoji}</span><b>{TIERS[s.league].name}</b><small>League</small></div>
+            <div className="pcards">
+              <div className="pcard fire"><h3>{s.streak}</h3><p>Day streak</p><span><Icon name="flame" /></span></div>
+              <div className="pcard zap"><h3>{s.xp}</h3><p>Total XP</p><span><Icon name="bolt" /></span></div>
+              <div className="pcard cup"><h3>{TIERS[s.league].name}</h3><p>League</p><span>{TIERS[s.league].emoji}</span></div>
             </div>
             <h2>Achievements</h2>
-            <div className="badges">
-              {ACHIEVEMENTS.map((a) => (
-                <button key={a.id} className={`badge ach ${earned(a) ? 'on' : ''}`} aria-label={a.name} onClick={() => setBadgeId(a.id)}>
+            <div className="stickers">
+              {achs.map(({ a, t }) => (
+                <button key={a.id} className={`sticker ${t ? 'on' : ''}`} aria-label={`${a.name}${t ? '' : ' (locked)'}`} onClick={() => setBadgeId(a.id)}>
                   <span>{a.emoji}</span>
                 </button>
               ))}
             </div>
-            <button className="btn red" onClick={() => { if (confirm('Erase all progress?')) { localStorage.clear(); location.reload() } }}>Reset progress</button>
+            <button className="btn alt" onClick={() => { set({ user: '' }); setTab('home') }}>Sign out</button>
           </div>
         )}
       </main>
 
       <nav className="tabs">
-        {TABS.map(([id, icon, label]) => (
+        {TABS.map(([id, label]) => (
           <button key={id} className={tab === id ? 'on' : ''} aria-label={label} aria-current={tab === id} onClick={() => setTab(id)}>
-            <span>{icon}</span>
+            <span><Icon name={id} /></span><small>{label}</small>
           </button>
         ))}
       </nav>

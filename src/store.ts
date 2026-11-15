@@ -19,11 +19,13 @@ export type State = {
   todayXp: number // XP earned on xpDay, drives the daily quest
   xpDay: string
   questHidden: string // day the finished-quest card was dismissed
+  user: '' | 'google' | 'facebook' // sign-in provider, '' = signed out
+  gotAt: Record<string, number> // achievement id -> when it was first seen earned
 }
 export const MAX_HEARTS = 5
 const HOUR = 36e5
 const KEY = 'thecoolnerd-v1'
-const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0, bestStreak: 0, league: 0, week: '', weekXp: 0, todayXp: 0, xpDay: '', questHidden: '' }
+const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0, bestStreak: 0, league: 0, week: '', weekXp: 0, todayXp: 0, xpDay: '', questHidden: '', user: '', gotAt: {} }
 // 1 heart per hour; the clock only runs while below max
 const regen = (o: State, now: number) => {
   if (o.hearts >= MAX_HEARTS) return { hearts: MAX_HEARTS, heartAt: now }

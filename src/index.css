@@ -5,7 +5,7 @@
   --blue:#1899d6; --blue-l:#ddf4ff; --blue-b:#84d8ff;
   --sun-l:#fff4d6; --sun-b:#ffc800; --sun-t:#a37d00;
   --ok-bg:#d7ffb8; --ok-t:#58a700; --bad-bg:#ffdfe0; --bad-t:#ea2b2b;
-  --lock:#e5e5e5; --lock-d:#cfcfcf; --dis:#e5e5e5; --dis-t:#afafaf;
+  --purple:#8a6bd1; --lock:#e5e5e5; --lock-d:#cfcfcf; --dis:#e5e5e5; --dis-t:#afafaf;
 }
 /* Dark mode follows the phone setting, like the Duolingo recording */
 @media (prefers-color-scheme: dark) {
@@ -15,10 +15,16 @@
     --blue:#49c0f8; --blue-l:#202f36; --blue-b:#49c0f8;
     --sun-l:#2f2a12; --sun-t:#ffd24d;
     --ok-bg:#1c3a14; --ok-t:#89e219; --bad-bg:#3b1d20; --bad-t:#ff6b6b;
-    --lock:#37464f; --lock-d:#25323a; --dis:#37464f; --dis-t:#52656d;
+    --purple:#9b87f5; --lock:#37464f; --lock-d:#25323a; --dis:#37464f; --dis-t:#52656d;
   }
 }
 * { box-sizing: border-box }
+html { scrollbar-gutter: stable }
+/* line icons (src/Icon.tsx): sit on the text baseline like the emoji they replaced */
+.i { display: inline-block; vertical-align: -.14em; flex: none }
+.c-fire { color: #ff9600 } .c-heart, .c-red { color: var(--red) } .c-star { color: #ffc800 } .c-ok { color: var(--green) } .c-pink { color: #ff86d0 }
+.setstars { display: inline-flex; gap: 10px } .setstars .i:not(.c-star) { color: var(--muted) }
+.pcard .i { stroke-width: 2.4 } /* keep width constant so the fixed tab bar doesn't jump when a tab is short enough to lose its scrollbar */
 body { margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); font-family: Nunito, system-ui, sans-serif; font-weight: 800; color: var(--text); background: var(--bg) }
 button, select, input { font: inherit; color: inherit }
 .app, .lesson { max-width: 520px; margin: 0 auto; min-height: 100vh }
@@ -34,7 +40,7 @@ header { position: sticky; top: 0; z-index: 3; background: var(--bg); display: f
 .chip { padding: 8px 14px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; background: var(--card); white-space: nowrap; cursor: pointer }
 .chip.on { border-color: var(--blue-b); background: var(--blue-l); color: var(--blue) }
 .chip:disabled { opacity: .5; cursor: not-allowed }
-main { padding: 0 16px 100px }
+main { padding: 0 16px 120px }
 h2 { font-size: 18px; margin: 20px 0 10px }
 
 /* chapter card sticks under the header; the next chapter's card slides over it */
@@ -115,12 +121,20 @@ main.world { background: #9fdc78 }
 .row select { border: 0; background: none; font-weight: 900; text-align: right }
 .row select option { color: #111 }
 .profile { text-align: center } .profile .row { text-align: left; cursor: default } .profile .btn { margin-top: 16px }
+/* profile stat cards: bright card, white title, pill button, big emoji peeking in from the right */
+.pcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0 }
+.pcard { position: relative; overflow: hidden; min-width: 0; padding: 12px 10px 40px; border-radius: 18px; text-align: left; color: #fff; background: radial-gradient(circle at 85% 30%, rgba(255,255,255,.22) 0 30%, transparent 31%), radial-gradient(circle at 10% 110%, rgba(0,0,0,.08) 0 25%, transparent 26%) var(--c) }
+.pcard.fire { --c: #ff9600 } .pcard.zap { --c: #58cc02 } .pcard.cup { --c: #1cb0f6 }
+.pcard h3 { margin: 0; font-size: 20px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .pcard p { margin: 0; font-size: 12px; font-weight: 700; opacity: .95 }
+.pcard span { position: absolute; right: -2px; bottom: -8px; font-size: 48px; line-height: 1; transform: rotate(-8deg); pointer-events: none }
 
-.tabs { position: fixed; z-index: 4; bottom: 0; left: 0; right: 0; max-width: 520px; margin: 0 auto; display: flex; gap: 4px; padding: 6px 10px calc(6px + env(safe-area-inset-bottom)); background: var(--bg); border-top: 2px solid var(--line) }
-.tabs button { flex: 1; display: flex; justify-content: center; padding: 8px 0; border: 2px solid transparent; border-radius: 14px; background: none; cursor: pointer }
-.tabs button span { font-size: 28px; filter: grayscale(1); opacity: .65; transition: transform .15s }
-.tabs button.on { border-color: var(--blue-b); background: var(--blue-l) }
-.tabs button.on span { filter: none; opacity: 1; transform: scale(1.1) }
+.tabs { position: fixed; z-index: 4; bottom: calc(10px + env(safe-area-inset-bottom)); left: 12px; right: 12px; max-width: 496px; margin: 0 auto; display: flex; padding: 8px 6px; background: var(--card); border: 2px solid var(--line); border-radius: 28px; box-shadow: 0 8px 24px rgba(0,0,0,.12) }
+.tabs button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--muted) }
+.tabs button span { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; font-size: 26px; color: var(--text); transition: transform .15s, background .15s }
+.tabs button small { font-size: 12px; font-weight: 800 }
+/* selected tab: a lifted paper disc, lit from the top with a soft shadow under it */
+.tabs button.on { color: #ff9600 }
+.tabs button.on span { color: #3d2200; transform: translateY(-2px); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.045' numOctaves='3' seed='7'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='4'%3E%3CfeDistantLight azimuth='225' elevation='50'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23p)'/%3E%3C/svg%3E") center/cover, linear-gradient(160deg, #ffd59a, #ffa62b 75%); background-blend-mode: multiply; box-shadow: inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 0 rgba(0,0,0,.12), 0 4px 8px rgba(255,150,0,.45) }
 
 .daily { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 16px; padding: 16px; text-align: left; background: var(--sun-l); border: 2px solid var(--sun-b); border-bottom-width: 5px; border-radius: 18px; cursor: pointer }
 .daily small { color: var(--sun-t) } .go { color: var(--btn-text); background: var(--green); padding: 8px 14px; border-radius: 12px; font-weight: 900 }
@@ -142,15 +156,13 @@ main.world { background: #9fdc78 }
 .zone { text-align: center; font-weight: 900; font-size: 13px; color: var(--ok-t); margin: 6px 0 }
 .zone.bad { color: var(--bad-t) }
 .row .up { color: var(--ok-t); font-weight: 900 } .row .down { color: var(--bad-t); font-weight: 900 }
-.badges { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity }
-.badges .badge { flex: none; width: 112px; scroll-snap-align: start }
-.badges.stats { display: grid; grid-template-columns: repeat(3, 1fr); overflow: visible; margin: 12px 0 }
-.badges.stats .badge { width: auto }
-.badge { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 14px 8px; border: 2px solid var(--line); border-radius: 16px; opacity: .45; filter: grayscale(1) }
-.badge.on { opacity: 1; filter: none; border-color: var(--sun-b); background: var(--sun-l) }
-.badge span { font-size: 36px } .badge small { color: var(--muted); font-size: 12px }
-.badge.ach { width: 84px; height: 84px; padding: 0; justify-content: center; background: none; color: inherit; cursor: pointer }
-.badge.ach.on { background: var(--sun-l) }
+/* achievement stickers: no frame, white die-cut edge from stacked drop-shadows, slight tilt */
+.stickers { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; padding: 4px 0 8px }
+.sticker { border: 0; background: none; padding: 4px; cursor: pointer; transition: transform .15s }
+.sticker span { display: block; font-size: 52px; line-height: 1; filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 4px rgba(0,0,0,.3)) }
+.sticker:nth-child(odd) { transform: rotate(-7deg) } .sticker:nth-child(even) { transform: rotate(6deg) }
+.sticker:active { transform: scale(.9) }
+.sticker:not(.on) span { filter: grayscale(1) brightness(.7); opacity: .35 }
 .splash { min-height: 100dvh; max-width: 520px; margin: 0 auto; padding: 56px 20px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px }
 .bubble { position: relative; padding: 18px 20px; border: 2px solid var(--line); border-radius: 22px; font-size: 18px; line-height: 1.5; margin-bottom: 18px }
 .bubble::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 16px; height: 16px; background: var(--bg); border: solid var(--line); border-width: 0 2px 2px 0; transform: translateX(-50%) rotate(45deg) }
@@ -203,3 +215,15 @@ main > * { animation: fadeIn .25s ease-out backwards }
 .qwrap { position: relative } .qclose { position: absolute; top: 22px; right: 12px; font-size: 18px }
 /* reduce motion: nothing moves, but the current lesson still gets a soft glow so kids can find it */
 @media (prefers-reduced-motion: reduce) { .node.current { animation: ring 2.4s ease-out infinite !important } }
+/* Login: pink hero with mascot, white sheet with social buttons */
+.login { min-height: 100dvh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; background: #f0607f }
+.login .top { flex: 1; display: grid; place-items: center; padding: 40px 24px 0 }
+.login .mascot { width: min(300px, 80vw); animation: bob 2.4s ease-in-out infinite }
+.login .sheet { position: relative; background: var(--bg); border-radius: 48px 48px 0 0; padding: 32px 20px 28px; text-align: center; display: flex; flex-direction: column; gap: 12px }
+.login .sheet::before { content: ""; position: absolute; inset: -18px 12% auto; height: 40px; border-radius: 50%; background: var(--bg) }
+.login small { font-size: 15px; color: var(--muted); position: relative }
+.login h1 { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 900 }
+.login p { margin: 0 0 8px; font-weight: 700; color: var(--muted) }
+.btn.social { display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: none; font-size: 17px }
+.btn.google { background: #fff; color: #3c4043; border: 2px solid var(--line); box-shadow: 0 4px 0 var(--line) }
+.btn.fb { background: #1877f2; color: #fff; box-shadow: 0 4px 0 #0f5bbf }
