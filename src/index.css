@@ -277,6 +277,30 @@ button.row { cursor: pointer } button.row:active:not(:disabled) { transform: tra
 .wiggle, .chest.shut { animation: wiggle 1.2s ease-in-out infinite; cursor: pointer }
 .chest.open { animation: pop .5s ease-out }
 
+/* ---------- premium: profile entry card + full page with three plans ---------- */
+.gopro { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 14px; padding: 10px 16px 10px 10px; border: 0; border-radius: 22px; text-align: left; color: #fff; background: radial-gradient(circle at 92% 0%, rgba(255, 255, 255, .22) 0 22%, transparent 23%), linear-gradient(135deg, #9a75ff, var(--grape)); box-shadow: 0 5px 0 var(--grape-d); cursor: pointer }
+.gopro .art { width: 46px; height: 46px; flex: none; display: grid; place-items: center; border-radius: 15px; background: rgba(255, 255, 255, .2); font-size: 26px }
+.gopro b { display: block; font-family: var(--display); font-weight: 600; font-size: 18px } .gopro small { font-size: 12px; opacity: .92 } .gopro .i { font-size: 20px }
+.btn.grape { background: var(--grape); color: #fff; box-shadow: 0 5px 0 var(--grape-d) }
+.premium { position: relative; max-width: 520px; min-height: 100dvh; margin: 0 auto; padding: 60px 20px 28px; display: flex; flex-direction: column; gap: 14px; text-align: center }
+.premium .close { position: absolute; top: 14px; left: 14px }
+.premium > * { animation: rise .55s var(--spring) backwards } .premium > :nth-child(3) { animation-delay: 70ms } .premium > :nth-child(4) { animation-delay: 140ms } .premium > :nth-child(n+5) { animation-delay: 210ms }
+.premium .crown { position: relative; font-size: 84px; line-height: 1; animation: zoomIn .55s var(--bounce) backwards, bob 1.6s .6s ease-in-out infinite }
+.premium h1 { margin: 0; font-size: 30px; line-height: 1.15 }
+.premium .fine { margin: 0 }
+.perks { display: grid; gap: 10px; margin: 0; padding: 14px 16px; list-style: none; text-align: left; background: var(--card); border-radius: 22px; box-shadow: var(--lift) }
+.perks li { display: flex; align-items: center; gap: 10px } .perks .dot { flex: none; background: var(--lime); color: var(--ink) }
+.impact { margin: 0; padding: 14px 16px; border-radius: 22px; background: var(--lime-l); text-align: left; line-height: 1.45 }
+.impact b { font-family: var(--display); font-size: 22px; color: var(--lime-t) }
+.plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px }
+.plan { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 20px 4px 12px; border: 3px solid transparent; border-radius: 20px; background: var(--card); box-shadow: 0 4px 0 var(--edge); cursor: pointer }
+.plan.on { border-color: var(--grape); background: var(--grape-l); box-shadow: 0 4px 0 var(--grape-d) }
+.plan small { color: var(--muted); font-size: 12px } .plan b { font-family: var(--display); font-weight: 600; font-size: 21px }
+.plan .per { color: var(--muted); font-size: 11px } .plan em { font-style: normal; font-size: 11px; font-weight: 800; color: var(--lime-t) }
+.best { position: absolute; top: -12px; left: 50%; translate: -50% 0; padding: 2px 8px; border-radius: 999px; background: var(--berry); color: #fff; font-size: 10px; letter-spacing: .5px; text-transform: uppercase; white-space: nowrap }
+.pstatus { display: flex; flex-direction: column; gap: 2px; padding: 16px; border-radius: 22px; background: var(--grape-l); box-shadow: 0 0 0 2px var(--grape) }
+.pstatus b { font-family: var(--display); font-weight: 600; font-size: 20px } .pstatus small { color: var(--muted) }
+
 /* ---------- login: sky with clouds, owl, cream sheet ---------- */
 .login { min-height: 100dvh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; background: radial-gradient(ellipse 64px 24px at 16% 12%, #fff 96%, transparent), radial-gradient(ellipse 44px 18px at 25% 9%, #fff 96%, transparent), radial-gradient(ellipse 80px 28px at 84% 22%, #fff 96%, transparent), radial-gradient(ellipse 50px 20px at 74% 19%, #fff 96%, transparent), linear-gradient(#62c3ff, #c4ebff 75%) }
 .login .top { flex: 1; display: grid; place-items: center; padding: 40px 24px 0 }
@@ -301,7 +325,7 @@ button.row { cursor: pointer } button.row:active:not(:disabled) { transform: tra
    uses the separate `scale` property so it stacks with each button's own translate/rotate press effects */
 button { transition: scale .35s var(--spring) }
 button:active:not(:disabled) { scale: var(--press, .94); transition-duration: .08s }
-.btn.big, .daily, .quest, .row, .tile, .picker, .dd-menu button { --press: .97 } /* wide cards squish less */
+.btn.big, .daily, .quest, .row, .tile, .picker, .dd-menu button, .gopro { --press: .97 } /* wide cards squish less */
 /* staggered entrance: cards and list items rise in one after another, 70ms apart (lilcosmo's enter(i)).
    `translate`, not transform, so stickers keep their tilt; the home top sheet only fades because it holds the fixed jump button */
 main > .hometop { animation: fadeIn .25s ease-out backwards }
@@ -321,7 +345,6 @@ main > .hometop { animation: fadeIn .25s ease-out backwards }
 .splash .bubble { transform-origin: 50% 100%; animation: zoomIn .45s var(--bounce) backwards }
 .splash .hero { animation: zoomIn .55s .12s var(--bounce) backwards, bob 1.4s 0.7s ease-in-out infinite }
 .splash :is(.num, .cap, .week, .heartrow) { animation: rise .55s .22s var(--spring) backwards }
-.login .sheet > * { animation: rise .55s var(--spring) backwards } .login .sheet > :nth-child(2) { animation-delay: 70ms } .login .sheet > :nth-child(3) { animation-delay: 140ms } .login .sheet > :nth-child(n+4) { animation-delay: 210ms }
 @keyframes rise { from { opacity: 0; translate: 0 18px } }
 @keyframes zoomIn { from { opacity: 0; scale: .4 } }
 @keyframes burst { 0% { transform: rotate(var(--a)) translateY(0) scale(1); opacity: 0 } 15% { opacity: 1 } 100% { transform: rotate(var(--a)) translateY(var(--d)) scale(.3); opacity: 0 } }

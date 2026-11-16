@@ -9,6 +9,7 @@ import Login from './Login'
 import { ACHIEVEMENTS } from './achievements'
 import Splash, { WeekStrip } from './Splash'
 import { Icon } from './Icon'
+import Premium, { untilText } from './Premium'
 import { DEMOTE, PROMOTE, SIZE, TIERS, board as leagueBoard, daysLeft, weekProgress } from './league'
 import { SLIDE_LESSONS, SLIDE_XP } from './slides'
 
@@ -40,14 +41,14 @@ function useDark(theme: '' | 'light' | 'dark') {
 }
 
 export default function App() {
-  const { s, set, finish, loseHeart, refillHearts } = useStore()
+  const { s, set, finish, loseHeart, refillHearts, buyPremium } = useStore()
   const [tab, setTab] = useState<Tab>('home')
   const [active, setActive] = useState<{ ci: number; step: number; practice?: boolean } | 'daily' | null>(null)
   const [lib, setLib] = useState<{ ci: number; step?: number } | null>(null) // Library drill-down: chapter -> lesson
   const [badgeId, setBadgeId] = useState('') // achievement shown full screen
   const [pickCls, setPickCls] = useState(false) // profile class list open
   const [celebrate, setCelebrate] = useState(0) // new streak count, shown once after the day's first lesson
-  const [page, setPage] = useState<'' | 'streak' | 'hearts'>('') // header stat detail pages
+  const [page, setPage] = useState<'' | 'streak' | 'hearts' | 'premium'>('') // full-screen pages
   const [chest, setChest] = useState<'' | 'shut' | 'open'>('') // daily quest reward screen
   const chapters = chaptersFor(s.cls)
   const key = (ci: number) => `${s.subject}:${s.cls}:${ci}`
@@ -118,6 +119,10 @@ export default function App() {
       <p className="fine">Longest streak: {Math.max(s.bestStreak, s.streak)} day{Math.max(s.bestStreak, s.streak) === 1 ? '' : 's'}</p>
     </Splash>
   )
+  if (page === 'premium') return <Premium until={s.premiumUntil} plan={s.plan} onBuy={buyPremium} onClose={close} />
+  if (page === 'hearts' && s.premium) return (
+    <Splash onClose={close} bubble="You're Premium, so your hearts never run out!" hero="💖" big="∞" caption="Unlimited hearts" btn="Keep learning" onClick={close} />
+  )
   if (page === 'hearts') {
     const full = s.hearts >= MAX_HEARTS
     return (
@@ -125,6 +130,7 @@ export default function App() {
         hero="❤️" big={`${s.hearts} / ${MAX_HEARTS}`} caption={full ? 'Full hearts' : `Next heart in ${Math.ceil(s.nextHeartMs / 6e4)} min`}
         btn={full ? 'Keep learning' : 'Watch ad: refill hearts'} onClick={full ? close : refillHearts}>
         <div className="heartrow" aria-hidden>{Array.from({ length: MAX_HEARTS }, (_, i) => <span key={i} className={i < s.hearts ? '' : 'off'}>❤️</span>)}</div>
+        <button className="btn alt" onClick={() => setPage('premium')}>👑 Get unlimited hearts</button>
       </Splash>
     )
   }
@@ -163,7 +169,7 @@ export default function App() {
           <span><small>{hello}</small><b>{NAME}!</b></span>
         </div>
         <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}><span className="dot fire"><Icon name="flame" className="fill" /></span>{s.streak}</button>
-        <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}><span className="dot heart"><Icon name="heart" className="fill" /></span>{s.hearts}</button>
+        <button className="stat" aria-label={`Hearts: ${s.premium ? 'unlimited' : s.hearts}`} onClick={() => setPage('hearts')}><span className="dot heart"><Icon name="heart" className="fill" /></span>{s.premium ? '∞' : s.hearts}</button>
       </header>}
 
       <main key={tab} className={tab === 'home' ? 'world' : undefined}>
@@ -327,6 +333,11 @@ export default function App() {
                 </ul>
               </>}
             </div>
+            <button className="gopro" onClick={() => setPage('premium')}>
+              <span className="art" aria-hidden>👑</span>
+              <span className="grow"><b>{s.premium ? 'Premium is on' : 'Go Premium'}</b><small>{s.premium ? `No ads · unlimited hearts · until ${untilText(s.premiumUntil)}` : 'No ads · unlimited hearts · 10% to good causes'}</small></span>
+              <Icon name="next" />
+            </button>
             <label className="setting">
               <span className="pic"><Icon name={dark ? 'moon' : 'sun'} /></span>
               <span className="grow"><b>Dark mode</b><small>{s.theme ? 'Your choice' : 'Following your phone'}</small></span>

@@ -22,11 +22,14 @@ export type State = {
   user: '' | 'google' | 'facebook' // sign-in provider, '' = signed out
   gotAt: Record<string, number> // achievement id -> when it was first seen earned
   theme: '' | 'light' | 'dark' // '' = follow the phone setting
+  plan: '' | Plan // last premium plan bought
+  premiumUntil: number // premium is on while this is in the future
 }
+export type Plan = 'monthly' | 'semiannual' | 'annual'
 export const MAX_HEARTS = 5
 const HOUR = 36e5
 const KEY = 'thecoolnerd-v1'
-const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0, bestStreak: 0, league: 0, week: '', weekXp: 0, todayXp: 0, xpDay: '', questHidden: '', user: '', gotAt: {}, theme: '' }
+const fresh: State = { cls: 4, subject: 'maths', streak: 0, lastDay: '', done: {}, last: {}, best: {}, hearts: MAX_HEARTS, heartAt: 0, bestStreak: 0, league: 0, week: '', weekXp: 0, todayXp: 0, xpDay: '', questHidden: '', user: '', gotAt: {}, theme: '', plan: '', premiumUntil: 0 }
 // 1 heart per hour; the clock only runs while below max
 const regen = (o: State, now: number) => {
   if (o.hearts >= MAX_HEARTS) return { hearts: MAX_HEARTS, heartAt: now }
@@ -54,12 +57,15 @@ export function useStore() {
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(t) }, [])
   const h = regen(s, now)
   const live = s.lastDay === day() || s.lastDay === day(1) ? s.streak : 0
+  const premium = s.premiumUntil > now // premium: unlimited hearts (Infinity), wrong answers cost nothing
   return {
-    s: { ...s, streak: live, xp: totalXp(s.best), todayXp: s.xpDay === day() ? s.todayXp : 0, hearts: h.hearts, nextHeartMs: h.hearts >= MAX_HEARTS ? 0 : h.heartAt + HOUR - now },
-    loseHeart: () => setS((o) => { const r = regen(o, Date.now()); return { ...o, hearts: Math.max(0, r.hearts - 1), heartAt: r.heartAt } }),
+    s: { ...s, streak: live, xp: totalXp(s.best), todayXp: s.xpDay === day() ? s.todayXp : 0, hearts: premium ? Infinity : h.hearts, nextHeartMs: premium || h.hearts >= MAX_HEARTS ? 0 : h.heartAt + HOUR - now, premium },
+    loseHeart: () => setS((o) => { if (o.premiumUntil > Date.now()) return o; const r = regen(o, Date.now()); return { ...o, hearts: Math.max(0, r.hearts - 1), heartAt: r.heartAt } }),
     // shortcut: ad watch is simulated, wire a real ad SDK before release
     refillHearts: () => setS((o) => ({ ...o, hearts: MAX_HEARTS, heartAt: Date.now() })),
     set: (p: Partial<State>) => setS((o) => ({ ...o, ...p })),
+    // shortcut: purchase is simulated, wire Play Billing / StoreKit (e.g. RevenueCat) before release. Buying again extends from the current end date
+    buyPremium: (plan: Plan, months: number) => setS((o) => { const d = new Date(Math.max(o.premiumUntil, Date.now())); d.setMonth(d.getMonth() + months); return { ...o, plan, premiumUntil: +d } }),
     finish(touched: string[], r: Result, o: { id?: string; progress?: { key: string; step: number } } = {}) {
       setS((old) => {
         const streak = old.lastDay === day() ? old.streak : old.lastDay === day(1) ? old.streak + 1 : 1

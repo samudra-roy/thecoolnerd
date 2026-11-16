@@ -73,7 +73,7 @@ export default function SlideLesson({ slides, title, award, hearts, nextHeartMs,
             <i style={{ width: `${(i / slides.length) * 100}%` }} />
           </div>
         </div>
-        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}><Icon name="heart" /> {hearts}</span>
+        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}><Icon name="heart" /> {hearts === Infinity ? '∞' : hearts}</span>
       </div>
 
       <div className="qbody">

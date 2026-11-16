@@ -105,7 +105,7 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
             <i style={{ width: `${correct * 10}%` }} />
           </div>
         </div>
-        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}><span className="time"><Icon name="clock" /> {clock(secs)}</span><Icon name="heart" /> {hearts}</span>
+        <span className={`hearts ${result === 'bad' ? 'hit' : ''}`}><span className="time"><Icon name="clock" /> {clock(secs)}</span><Icon name="heart" /> {hearts === Infinity ? '∞' : hearts}</span>
       </div>
 
       <div className="qbody">
