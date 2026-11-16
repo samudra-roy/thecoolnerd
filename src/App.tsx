@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { CLASSES, LESSONS_PER_CHAPTER, SUBJECTS, chaptersFor, scale } from './data'
 import { MAX_HEARTS, day, useStore } from './store'
 import { makeLesson, makeMix } from './questions'
@@ -32,6 +32,13 @@ const Subjects = ({ cur, set }: { cur: string; set: (p: { subject: string }) => 
   </nav>
 )
 
+const phoneDark = matchMedia('(prefers-color-scheme: dark)')
+function useDark(theme: '' | 'light' | 'dark') {
+  const [sys, setSys] = useState(phoneDark.matches)
+  useEffect(() => { const f = () => setSys(phoneDark.matches); phoneDark.addEventListener('change', f); return () => phoneDark.removeEventListener('change', f) }, [])
+  return theme ? theme === 'dark' : sys
+}
+
 export default function App() {
   const { s, set, finish, loseHeart, refillHearts } = useStore()
   const [tab, setTab] = useState<Tab>('home')
@@ -61,6 +68,10 @@ export default function App() {
   useEffect(() => { if (unstamped) set({ gotAt: { ...s.gotAt, ...Object.fromEntries(unstamped.split(',').map((id) => [id, Date.now()])) } }) }, [unstamped]) // eslint-disable-line react-hooks/exhaustive-deps
   // earned newest first (same-time ties: harder ones, later in the list, first), then locked in list order
   const achs = ACHIEVEMENTS.map((a, i) => ({ a, i, t: earned(a) ? s.gotAt[a.id] || Infinity : 0 })).sort((x, y) => y.t - x.t || (x.t ? y.i - x.i : x.i - y.i))
+
+  // theme on <html data-theme>: the profile switch if set, else the phone setting (kept live); layout effect so dark users never see a light flash
+  const dark = useDark(s.theme)
+  useLayoutEffect(() => { document.documentElement.dataset.theme = dark ? 'dark' : 'light' }, [dark])
 
   if (!s.user) return <Login onLogin={(user) => set({ user })} />
 
@@ -316,6 +327,11 @@ export default function App() {
                 </ul>
               </>}
             </div>
+            <label className="setting">
+              <span className="pic"><Icon name={dark ? 'moon' : 'sun'} /></span>
+              <span className="grow"><b>Dark mode</b><small>{s.theme ? 'Your choice' : 'Following your phone'}</small></span>
+              <input type="checkbox" role="switch" className="switch" checked={dark} onChange={(e) => set({ theme: e.target.checked ? 'dark' : 'light' })} />
+            </label>
             <div className="pcards">
               <div className="pcard fire"><h3>{s.streak}</h3><p>Day streak</p><span><Icon name="flame" /></span></div>
               <div className="pcard zap"><h3>{s.xp}</h3><p>Total XP</p><span><Icon name="bolt" /></span></div>
