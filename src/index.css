@@ -19,12 +19,12 @@
   }
 }
 * { box-sizing: border-box }
-html { scrollbar-gutter: stable }
+html { scrollbar-gutter: stable } /* keep width constant so the fixed tab bar doesn't jump when a tab is short enough to lose its scrollbar */
 /* line icons (src/Icon.tsx): sit on the text baseline like the emoji they replaced */
-.i { display: inline-block; vertical-align: -.14em; flex: none }
+.i { display: inline-block; vertical-align: -.14em; flex: none } .i.fill { fill: currentColor }
 .c-fire { color: var(--orange) } .c-heart, .c-red { color: var(--red) } .c-star { color: #ffc800 } .c-ok { color: var(--green) } .c-pink { color: #ff86d0 }
 .setstars { display: inline-flex; gap: 10px } .setstars .i:not(.c-star) { color: var(--muted) }
-.pcard .i { stroke-width: 2.4 } /* keep width constant so the fixed tab bar doesn't jump when a tab is short enough to lose its scrollbar */
+.pcard .i { stroke-width: 2.4 }
 body { margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); font-family: Nunito, system-ui, sans-serif; font-weight: 800; color: var(--text); background: var(--bg) }
 button, select, input { font: inherit; color: inherit }
 button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none }

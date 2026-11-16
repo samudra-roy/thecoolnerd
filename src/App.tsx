@@ -149,8 +149,8 @@ export default function App() {
           <span className="av">🧑‍🚀</span>
           <span><small>Welcome back</small><b>{NAME}</b></span>
         </div>
-        <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}><Icon name="flame" className="c-fire" /> {s.streak}</button>
-        <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}><Icon name="heart" className="c-heart" /> {s.hearts}</button>
+        <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}><Icon name="flame" className="c-fire fill" /> {s.streak}</button>
+        <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}><Icon name="heart" className="c-heart fill" /> {s.hearts}</button>
       </header>}
 
       <main key={tab} className={tab === 'home' ? 'world' : undefined}>
