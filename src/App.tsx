@@ -193,6 +193,11 @@ export default function App() {
             </button>
             {claimed && <button className="x qclose" aria-label="Hide quest card" onClick={() => set({ questHidden: day() })}><Icon name="close" /></button>}
             </div>}
+            {!s.premium && <button className="gopro" onClick={() => setPage('premium')}>
+              <span className="art" aria-hidden>👑</span>
+              <span className="grow"><b>Go Premium</b><small>No ads · unlimited hearts · 10% to good causes</small></span>
+              <Icon name="next" />
+            </button>}
             <Subjects cur={s.subject} set={set} />
             <button className="jump" aria-label="Jump to current lesson" onClick={() => document.querySelector('.node.current')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}><Icon name="pin" className="c-red" /></button>
           </div>

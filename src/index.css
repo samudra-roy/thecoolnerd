@@ -298,6 +298,11 @@ button.row { cursor: pointer } button.row:active:not(:disabled) { transform: tra
 .plan small { color: var(--muted); font-size: 12px } .plan b { font-family: var(--display); font-weight: 600; font-size: 21px }
 .plan .per { color: var(--muted); font-size: 11px } .plan em { font-style: normal; font-size: 11px; font-weight: 800; color: var(--lime-t) }
 .best { position: absolute; top: -12px; left: 50%; translate: -50% 0; padding: 2px 8px; border-radius: 999px; background: var(--berry); color: #fff; font-size: 10px; letter-spacing: .5px; text-transform: uppercase; white-space: nowrap }
+.give h1 { font-size: 24px } .give .pct { display: block; font-size: 56px; line-height: 1; color: var(--lime-t) }
+.give h2 { margin: 6px 0 0; font-size: 20px }
+.causes li > span { width: 28px; flex: none; font-size: 22px; text-align: center }
+.topups { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px }
+.topups .chip { padding: 11px 18px; font-size: 17px }
 .pstatus { display: flex; flex-direction: column; gap: 2px; padding: 16px; border-radius: 22px; background: var(--grape-l); box-shadow: 0 0 0 2px var(--grape) }
 .pstatus b { font-family: var(--display); font-weight: 600; font-size: 20px } .pstatus small { color: var(--muted) }
 
