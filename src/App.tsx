@@ -12,7 +12,7 @@ import { Icon } from './Icon'
 import { DEMOTE, PROMOTE, SIZE, TIERS, board as leagueBoard, daysLeft, weekProgress } from './league'
 import { SLIDE_LESSONS, SLIDE_XP } from './slides'
 
-const COLORS = ['#58cc02', '#1cb0f6', '#ce82ff', '#ff9600', '#ff86d0']
+const COLORS = ['var(--sky)', 'var(--berry)', 'var(--grape)', 'var(--tang)', 'var(--lime-d)'] // chapter colours, from the palette in index.css
 const NAME = 'Princesam' // shortcut: one hardcoded learner name, read it from the account when auth lands
 const QUEST_XP = 30 // daily quest goal
 const CHEST_XP = 20 // reward, stored as a best entry so totalXp picks it up
@@ -141,40 +141,44 @@ export default function App() {
   )
 
   const board = [...FRIENDS, { name: 'You', e: '🧑‍🚀', xp: s.xp, streak: s.streak }].sort((a, b) => b.xp - a.xp)
+  const hour = new Date().getHours()
+  const hello = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   return (
     <div className="app">
       {tab !== 'profile' && <header>
         <div className="cls">
           <span className="av">🧑‍🚀</span>
-          <span><small>Welcome back</small><b>{NAME}</b></span>
+          <span><small>{hello}</small><b>{NAME}!</b></span>
         </div>
-        <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}><Icon name="flame" className="c-fire fill" /> {s.streak}</button>
-        <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}><Icon name="heart" className="c-heart fill" /> {s.hearts}</button>
+        <button className="stat" aria-label={`Day streak: ${s.streak}`} onClick={() => setPage('streak')}><span className="dot fire"><Icon name="flame" className="fill" /></span>{s.streak}</button>
+        <button className="stat" aria-label={`Hearts: ${s.hearts}`} onClick={() => setPage('hearts')}><span className="dot heart"><Icon name="heart" className="fill" /></span>{s.hearts}</button>
       </header>}
 
       <main key={tab} className={tab === 'home' ? 'world' : undefined}>
         {tab === 'home' && (
-          <>
+          <div className="hometop">
             <button className="daily" onClick={() => setActive('daily')}>
-              <span className="emo c-red"><Icon name="target" /></span>
-              <span className="grow"><b>Daily practice</b><br /><small>{nextSet < 0 ? 'All 3 perfect! Bonus set (no XP)' : `Set ${nextSet + 1} of 3 · revises what you learned`}</small><br />
-                <small className="setstars">{setStars.map((n, i) => <span key={i}>{n ? Array.from({ length: n }, (_, j) => <Icon key={j} name="star" className="c-star" />) : <Icon name="star" />}</span>)}</small></span>
-              <span className="go">{nextSet < 0 ? 'BONUS' : 'START'}</span>
+              <span className="tag">{nextSet < 0 ? 'Bonus set' : `Today · set ${nextSet + 1} of 3`}</span>
+              <b>Daily practice</b>
+              <small>{nextSet < 0 ? 'All 3 perfect! Extra practice, no XP' : 'Revises what you learned'}</small>
+              <span className="setstars">{setStars.map((n, i) => <span key={i}>{n ? Array.from({ length: n }, (_, j) => <Icon key={j} name="star" className="c-star" />) : <Icon name="star" />}</span>)}</span>
+              <span className="go">{nextSet < 0 ? 'Bonus round' : "Let's play"}</span>
+              <span className="art" aria-hidden><Icon name="target" /></span>
             </button>
             {s.questHidden !== day() && <div className="qwrap">
-            <button className="daily quest" disabled={!questDone || claimed} onClick={() => setChest('shut')}>
-              <span className={`emo ${questDone && !claimed ? 'wiggle' : ''}`}><Icon name={claimed ? 'done' : 'gift'} className={claimed ? 'c-ok' : 'c-pink'} /></span>
+            <button className={`quest ${claimed ? 'claimed' : ''}`} disabled={!questDone || claimed} onClick={() => setChest('shut')}>
+              <span className={`qic ${questDone && !claimed ? 'wiggle' : ''}`}><Icon name={claimed ? 'done' : 'gift'} /></span>
               <span className="grow"><b>{claimed ? 'Quest complete!' : `Daily quest: earn ${QUEST_XP} XP`}</b>
                 {claimed ? <><br /><small>New quest tomorrow</small></>
                   : <span className="qbar"><i style={{ width: `${Math.min(100, (s.todayXp / QUEST_XP) * 100)}%` }} /><em>{Math.min(s.todayXp, QUEST_XP)} / {QUEST_XP}</em></span>}</span>
-              {questDone && !claimed && <span className="go">OPEN</span>}
+              {questDone && !claimed && <span className="go">Open</span>}
             </button>
             {claimed && <button className="x qclose" aria-label="Hide quest card" onClick={() => set({ questHidden: day() })}><Icon name="close" /></button>}
             </div>}
             <Subjects cur={s.subject} set={set} />
             <button className="jump" aria-label="Jump to current lesson" onClick={() => document.querySelector('.node.current')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}><Icon name="pin" className="c-red" /></button>
-          </>
+          </div>
         )}
         {tab === 'home' && <div className="trail">{chapters.map((ch, ci) => {
           const color = COLORS[ci % COLORS.length]
@@ -217,13 +221,15 @@ export default function App() {
               <h2>Subject</h2>
               <Subjects cur={s.subject} set={set} />
               <h2>Chapters</h2>
-              {chapters.map((ch, ci) => (
-                <button key={ch.title} className="row" onClick={() => setLib({ ci })}>
-                  <span className="emo"><Icon name={ch.gen} /></span>
-                  <span className="grow">{ch.title}</span>
-                  <span>{doneIn(ci)}/{LESSONS_PER_CHAPTER}</span><Icon name="next" className="chev" />
-                </button>
-              ))}
+              <div className="tiles">
+                {chapters.map((ch, ci) => (
+                  <button key={ch.title} className="tile" onClick={() => setLib({ ci })}>
+                    <span className="art" style={{ '--c': COLORS[ci % COLORS.length] } as React.CSSProperties}><Icon name={ch.gen} /></span>
+                    <b>{ch.title}</b>
+                    <small>{doneIn(ci)} of {LESSONS_PER_CHAPTER} done</small>
+                  </button>
+                ))}
+              </div>
             </>
           )
           const { ci, step } = lib

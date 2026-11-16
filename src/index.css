@@ -1,262 +1,312 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap');
+/* "Paper & candy": warm cream paper, navy ink, white cards lifted on a soft edge, candy-coloured tiles.
+   This block and the dark one below are the whole palette */
 :root {
-  --bg:#fff; --card:#fff; --line:#e5e5e5; --text:#4b4b4b; --muted:#afafaf;
-  --green:#58cc02; --green-d:#58a700; --btn-text:#fff; --red:#ff4b4b; --red-d:#ea2b2b;
-  --blue:#1899d6; --blue-l:#ddf4ff; --blue-b:#84d8ff;
-  --sun-l:#fff4d6; --sun-b:#ffc800; --sun-t:#a37d00;
-  --ok-bg:#d7ffb8; --ok-t:#58a700; --bad-bg:#ffdfe0; --bad-t:#ea2b2b;
-  --orange:#ff9600; --purple:#8a6bd1; --lock:#e5e5e5; --lock-d:#cfcfcf; --dis:#e5e5e5; --dis-t:#afafaf;
+  color-scheme: light;
+  --bg: #fdf7ec; --card: #fff; --soft: #f5ecdc; --line: #eee4d3; --edge: #e6d9c3;
+  --text: #1e2549; --muted: #8a8ea6;
+  --sky: #2a9fe0; --sky-d: #1b7bb5; --sky-l: #e2f3fd;
+  --berry: #f04d86; --berry-d: #c92d63; --berry-l: #ffe5ee;
+  --grape: #7c55ea; --grape-d: #5b36c7; --grape-l: #eee8ff;
+  --tang: #ff8f2e; --tang-d: #db6c10; --tang-l: #fff0e0;
+  --lime: #7ccf3c; --lime-d: #55a31d; --lime-l: #e8f8da;
+  --sun: #ffc83d; --sun-d: #e0a215; --sun-l: #fff5d6;
+  --red: #ff5468; --ink: #1e2549; /* ink: text on bright fills, navy in both themes */
+  --sky-t: var(--sky-d); --berry-t: var(--berry-d); --lime-t: var(--lime-d); --tang-t: var(--tang-d); --sun-t: #8a7342; /* text on tinted backgrounds */
+  --locked: #efe7d8; --locked-t: #b4a991;
+  --lift: 0 4px 0 var(--edge), 0 10px 22px rgba(30, 37, 73, .07);
+  --display: Fredoka, Nunito, system-ui, sans-serif;
 }
-/* Dark mode follows the phone setting, like the Duolingo recording */
+/* dark mode follows the phone: navy paper, same candy colours, lighter text on tints */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg:#131f24; --card:#131f24; --line:#37464f; --text:#e5eef2; --muted:#8aa0ab;
-    --green:#89e219; --green-d:#58a700; --btn-text:#131f24;
-    --blue:#49c0f8; --blue-l:#202f36; --blue-b:#49c0f8;
-    --sun-l:#2f2a12; --sun-t:#ffd24d;
-    --ok-bg:#1c3a14; --ok-t:#89e219; --bad-bg:#3b1d20; --bad-t:#ff6b6b;
-    --purple:#9b87f5; --lock:#37464f; --lock-d:#25323a; --dis:#37464f; --dis-t:#52656d;
+    color-scheme: dark;
+    --bg: #141a33; --card: #1f2747; --soft: #2a3358; --line: #2c355c; --edge: #0b0f27;
+    --text: #f3efe6; --muted: #959cba;
+    --sky-l: #17344f; --berry-l: #3d1c33; --grape-l: #2b2256; --tang-l: #3d2a17; --lime-l: #1f381b; --sun-l: #382f17;
+    --sky-t: #7fcaf6; --berry-t: #ff8fb6; --lime-t: #a5e070; --tang-t: #ffb36b; --sun-t: #f0cf6a;
+    --locked: #2a3358; --locked-t: #7a82a6;
+    --lift: 0 4px 0 var(--edge), 0 10px 22px rgba(0, 0, 0, .25);
   }
+  /* the map stays daylight but dimmed, so it doesn't glare next to the navy */
+  main.world { background: #75a260 }
+  .trail { background: linear-gradient(rgba(10, 14, 36, .28), rgba(10, 14, 36, .28)), url(/world.svg) center top / auto 2280px repeat-y }
+  .hometop { box-shadow: 0 5px 0 rgba(0, 0, 0, .25) }
+  .end:not(.bad) { background: radial-gradient(circle at 50% 28%, #5c4815, #2c2511 70%) }
+  .end .fine { color: var(--sun-t) }
+  .tier { box-shadow: 0 4px 0 var(--edge) }
+  .btn.google { color: var(--text) }
+  .login { background: radial-gradient(ellipse 64px 24px at 16% 12%, rgba(255, 255, 255, .14) 96%, transparent), radial-gradient(ellipse 80px 28px at 84% 22%, rgba(255, 255, 255, .14) 96%, transparent), linear-gradient(#16275c, #2f4f9a 75%) }
 }
 * { box-sizing: border-box }
 html { scrollbar-gutter: stable } /* keep width constant so the fixed tab bar doesn't jump when a tab is short enough to lose its scrollbar */
-/* line icons (src/Icon.tsx): sit on the text baseline like the emoji they replaced */
-.i { display: inline-block; vertical-align: -.14em; flex: none } .i.fill { fill: currentColor }
-.c-fire { color: var(--orange) } .c-heart, .c-red { color: var(--red) } .c-star { color: #ffc800 } .c-ok { color: var(--green) } .c-pink { color: #ff86d0 }
-.setstars { display: inline-flex; gap: 10px } .setstars .i:not(.c-star) { color: var(--muted) }
-.pcard .i { stroke-width: 2.4 }
-body { margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); font-family: Nunito, system-ui, sans-serif; font-weight: 800; color: var(--text); background: var(--bg) }
+body { margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); font-family: Nunito, system-ui, sans-serif; font-weight: 700; color: var(--text); background: var(--bg) }
+h1, h2, h3 { font-family: var(--display); font-weight: 600 }
 button, select, input { font: inherit; color: inherit }
 button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none }
-:focus-visible { outline: 3px solid var(--blue-b); outline-offset: 2px }
+:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px }
 .app, .lesson { max-width: 520px; margin: 0 auto; min-height: 100dvh }
-header { position: sticky; top: 0; z-index: 3; background: var(--bg); display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 2px solid var(--line) }
-.stat { font-weight: 900; font-size: 18px; border: 0; background: none; padding: 6px 8px; border-radius: 12px; cursor: pointer }
-.stat:active { transform: scale(.92) }
-.cls { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0 }
-.cls span:last-child { display: flex; flex-direction: column; line-height: 1.15; min-width: 0 }
-.cls small { font-size: 13px; font-weight: 700; color: var(--muted) }
-.cls b { font-size: 20px; font-weight: 900; color: var(--green-d); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-.av { width: 44px; height: 44px; flex: none; display: grid; place-items: center; font-size: 26px; border-radius: 50%; background: var(--blue-l); border: 2px solid var(--blue-b) }
-.subjects { display: flex; gap: 8px; margin: 16px 0 0; padding: 0 0 2px; overflow-x: auto; scrollbar-width: none }
-.chip { padding: 8px 14px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; background: var(--card); white-space: nowrap; cursor: pointer }
-.chip.on { border-color: var(--blue-b); background: var(--blue-l); color: var(--blue) }
-.chip:disabled { color: var(--muted); cursor: not-allowed }
-/* flow-root keeps the first card's top margin inside main, so no strip of page background shows under the header */
-main { display: flow-root; padding: 0 16px 120px }
-h2 { font-size: 18px; margin: 20px 0 10px }
+main { display: flow-root; padding: 0 16px 120px } /* flow-root keeps the first card's top margin inside main */
+h2 { font-size: 20px; margin: 22px 0 10px }
+.grow { flex: 1 }
+.fine { margin: 4px 0 16px; color: var(--muted); font-size: 14px }
 
-/* chapter ribbon banner: sticks under the header; notched tails fold behind it in a darker shade.
-   tails use z-index -1 inside the sticky element's own stacking context, so they sit behind the strip only */
-.banner { position: sticky; top: 70px; z-index: 2; align-self: center; width: min(300px, calc(100% - 64px)); margin-top: 6px; padding: 7px 12px 9px; text-align: center; color: #fff; background: var(--c); border-radius: 4px; box-shadow: inset 0 -4px 0 rgba(0,0,0,.15), 0 5px 0 rgba(0,0,0,.2) }
-.banner::before, .banner::after { content: ''; position: absolute; z-index: -1; top: 12px; width: 40px; height: 100%; background: linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,.28)), var(--c) }
-.banner::before { left: -28px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 30% 50%) }
-.banner::after { right: -28px; clip-path: polygon(0 0, 100% 0, 70% 50%, 100% 100%, 0 100%) }
-.banner small { font-size: 11px; letter-spacing: 1.5px; opacity: .9 } .banner h3 { margin: 1px 0 0; font-size: 19px; line-height: 1.2; text-shadow: 0 2px 0 rgba(0,0,0,.15) }
-.emo { font-size: 38px }
-/* home only: grass, and one tall looping map (public/world.svg from scripts/gen-scenes.mjs) behind all chapters.
+/* line icons (src/Icon.tsx): sit on the text baseline like the emoji they replaced */
+.i { display: inline-block; vertical-align: -.14em; flex: none } .i.fill { fill: currentColor }
+.c-fire { color: var(--tang) } .c-heart, .c-red { color: var(--red) } .c-ok { color: var(--lime-t) } .c-pink { color: var(--berry) }
+.c-star { color: var(--sun-d); fill: var(--sun) } /* stars and bolts read as filled gold */
+
+/* ---------- buttons: pills on a darker bottom edge, sentence case ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; padding: 14px 26px; font-family: var(--display); font-weight: 600; font-size: 18px; color: var(--ink); background: var(--lime); box-shadow: 0 5px 0 var(--lime-d); cursor: pointer }
+.btn.big { width: 100%; padding: 16px }
+.btn.red { background: var(--berry); color: #fff; box-shadow: 0 5px 0 var(--berry-d) }
+.btn.alt { background: var(--card); color: var(--text); box-shadow: 0 5px 0 var(--edge) }
+.btn:disabled { background: var(--soft); color: var(--muted); box-shadow: 0 5px 0 var(--edge); cursor: not-allowed }
+.btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0, 0, 0, .15) }
+.x { display: grid; place-items: center; width: 44px; height: 44px; flex: none; padding: 0; border: 0; border-radius: 50%; background: var(--card); box-shadow: 0 3px 0 var(--edge); font-size: 22px; color: var(--text); cursor: pointer }
+.x:active { transform: translateY(2px); box-shadow: none }
+.back { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 12px 12px 0 0; border: 0; background: none; color: var(--sky-t); font-family: var(--display); font-weight: 600; font-size: 17px; cursor: pointer }
+.go { flex: none; padding: 10px 18px; border-radius: 999px; background: var(--sun); color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 16px; box-shadow: 0 4px 0 var(--sun-d) }
+
+/* ---------- top bar: avatar, greeting, counter pills ---------- */
+header { position: sticky; top: 0; z-index: 3; display: flex; gap: 8px; align-items: center; padding: 10px 16px; background: var(--bg) }
+.cls { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 0 }
+.cls span:last-child { display: flex; flex-direction: column; line-height: 1.1; min-width: 0 }
+.cls small { font-size: 13px; color: var(--muted) }
+.cls b { font-family: var(--display); font-size: 21px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.av { width: 44px; height: 44px; flex: none; display: grid; place-items: center; font-size: 26px; border-radius: 50%; background: var(--sun-l); box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--sun) }
+.stat { display: flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; border: 0; border-radius: 999px; background: var(--card); box-shadow: var(--lift); font-family: var(--display); font-weight: 600; font-size: 17px; cursor: pointer }
+.stat:active { transform: translateY(2px) }
+.dot { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: #fff; font-size: 16px }
+.dot.fire { background: var(--tang) } .dot.heart { background: var(--red) }
+
+/* ---------- tab bar: white dock, each tab lights up in its own colour ---------- */
+.tabs { position: fixed; z-index: 4; bottom: calc(10px + env(safe-area-inset-bottom)); left: 12px; right: 12px; max-width: 496px; margin: 0 auto; display: flex; padding: 8px 6px; background: var(--card); border-radius: 28px; box-shadow: 0 4px 0 var(--edge), 0 14px 30px rgba(30, 37, 73, .16) }
+.tabs button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; border: 0; background: none; color: var(--muted); cursor: pointer }
+.tabs button span { width: 48px; height: 40px; display: grid; place-items: center; border-radius: 15px; font-size: 24px; transition: transform .15s, background .15s }
+.tabs button small { font-family: var(--display); font-size: 12px; font-weight: 600 }
+.tabs button.on { color: var(--text) }
+.tabs button.on span { color: #fff; background: var(--t); box-shadow: 0 3px 0 var(--td); transform: translateY(-2px) }
+.tabs button:nth-child(1) { --t: var(--lime); --td: var(--lime-d) } .tabs button:nth-child(2) { --t: var(--sky); --td: var(--sky-d) }
+.tabs button:nth-child(3) { --t: var(--sun); --td: var(--sun-d) } .tabs button:nth-child(4) { --t: var(--berry); --td: var(--berry-d) }
+.tabs button:nth-child(5) { --t: var(--grape); --td: var(--grape-d) }
+
+/* ---------- home: cream top sheet with the hero card, the map peeks out under its rounded edge ---------- */
+.hometop { margin: 0 -16px; padding: 2px 16px 18px; background: var(--bg); border-radius: 0 0 30px 30px; box-shadow: 0 5px 0 rgba(30, 37, 73, .07) }
+.daily { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-top: 6px; padding: 18px 18px 20px; text-align: left; color: #fff; border: 0; border-radius: 26px; background: radial-gradient(circle at 96% 8%, rgba(255, 255, 255, .22) 0 16%, transparent 17%), radial-gradient(circle at 78% 115%, rgba(255, 255, 255, .14) 0 30%, transparent 31%), linear-gradient(135deg, #41b9f6, #2a8fe0); box-shadow: 0 5px 0 var(--sky-d), 0 12px 24px rgba(42, 159, 224, .25); cursor: pointer }
+.daily:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--sky-d) }
+.daily .tag { padding: 4px 10px; border-radius: 999px; background: rgba(255, 255, 255, .22); font-size: 11px; letter-spacing: 1px; text-transform: uppercase }
+.daily b { font-family: var(--display); font-weight: 600; font-size: 27px; line-height: 1.1; margin-top: 4px }
+.daily small { font-size: 14px; opacity: .92 }
+.daily .go { margin-top: 12px }
+.daily .art { position: absolute; right: -18px; top: 50%; translate: 0 -50%; font-size: 136px; color: rgba(255, 255, 255, .25); pointer-events: none }
+.setstars { display: inline-flex; gap: 10px; margin-top: 2px; font-size: 16px } .setstars .i:not(.c-star) { color: rgba(255, 255, 255, .6) }
+.qwrap { position: relative }
+.quest { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 14px; padding: 14px; text-align: left; border: 0; border-radius: 22px; background: var(--card); box-shadow: var(--lift); cursor: pointer }
+.quest:disabled { cursor: default }
+.quest b { font-family: var(--display); font-weight: 600; font-size: 17px }
+.quest small { color: var(--muted) }
+.qic { width: 48px; height: 48px; flex: none; display: grid; place-items: center; border-radius: 16px; background: var(--berry-l); color: var(--berry); font-size: 28px }
+.quest.claimed .qic { background: var(--lime-l); color: var(--lime-t) }
+.qbar { position: relative; display: block; height: 18px; margin-top: 6px; background: var(--soft); border-radius: 9px; overflow: hidden }
+.qbar i { display: block; height: 100%; background: var(--berry); border-radius: 9px; transition: width .6s cubic-bezier(.3, 1.4, .5, 1) }
+.qbar em { position: absolute; inset: 0; font-style: normal; font-size: 12px; line-height: 18px; text-align: center }
+.qclose { position: absolute; top: 50%; right: 12px; translate: 0 -50%; width: 36px; height: 36px; font-size: 18px; background: var(--soft); box-shadow: none }
+.subjects { display: flex; gap: 8px; margin: 16px -16px 0; padding: 2px 16px 6px; overflow-x: auto; scrollbar-width: none }
+.chip { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border: 0; border-radius: 999px; background: var(--card); box-shadow: 0 3px 0 var(--edge); white-space: nowrap; font-family: var(--display); font-weight: 600; font-size: 15px; cursor: pointer }
+.chip.on { background: var(--text); color: var(--bg); box-shadow: 0 3px 0 rgba(0, 0, 0, .35) }
+.chip:disabled { color: var(--muted); cursor: not-allowed }
+.chip small { padding: 1px 7px; border-radius: 999px; background: var(--soft); font-size: 11px }
+
+/* map: one tall looping picture (public/world.svg from scripts/gen-scenes.mjs) behind all chapters.
    every chapter is exactly 760px with its path at the bottom, so the baked-in road always passes through the nodes */
 main.world { background: #9fdc78 }
 .trail { margin: 0 -16px; padding: 0 16px; background: url(/world.svg) center top / auto 2280px repeat-y }
 .scene { height: 760px; display: flex; flex-direction: column; padding-top: 24px }
 .path { display: flex; flex-direction: column; align-items: center; gap: 50px; padding: 40px 0 28px; margin-top: auto }
-.node { position: relative; width: 72px; height: 72px; border-radius: 50%; border: 0; font-size: 28px; color: #fff; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,.25); transition: transform .1s, box-shadow .1s }
-.node:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.25) }
-.node.locked { background: var(--lock); color: var(--muted); box-shadow: 0 6px 0 var(--lock-d); cursor: not-allowed }
-/* the lesson you are on: pulsing ring */
+/* chapter ribbon: sticks under the top bar; notched tails sit behind the strip (z-index -1 inside its own stacking context) */
+.banner { position: sticky; top: 72px; z-index: 2; align-self: center; width: min(300px, calc(100% - 64px)); margin-top: 6px; padding: 7px 12px 9px; text-align: center; color: #fff; background: var(--c); border-radius: 6px; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .15), 0 5px 0 rgba(0, 0, 0, .18) }
+.banner::before, .banner::after { content: ''; position: absolute; z-index: -1; top: 12px; width: 40px; height: 100%; background: linear-gradient(rgba(0, 0, 0, .28), rgba(0, 0, 0, .28)), var(--c) }
+.banner::before { left: -28px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 30% 50%) }
+.banner::after { right: -28px; clip-path: polygon(0 0, 100% 0, 70% 50%, 100% 100%, 0 100%) }
+.banner small { font-size: 11px; letter-spacing: 1.5px; opacity: .92 } .banner h3 { margin: 1px 0 0; font-size: 20px; line-height: 1.2; text-shadow: 0 2px 0 rgba(0, 0, 0, .18) }
+/* lesson tiles: rounded squares with a white rim, not circles */
+.node { position: relative; width: 76px; height: 76px; border-radius: 26px; border: 4px solid #fff; font-size: 30px; color: #fff; cursor: pointer; box-shadow: 0 6px 0 rgba(0, 0, 0, .2), 0 10px 18px rgba(0, 0, 0, .12); transition: transform .1s, box-shadow .1s }
+.node .i { stroke-width: 2.4 }
+.node:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0, 0, 0, .2) }
+.node.locked { background: var(--locked); color: var(--locked-t); cursor: not-allowed }
 .node.current { animation: breathe 1.6s ease-in-out infinite }
-/* spinning dashed halo, outlined so it reads on light grass too; uses `scale`/`rotate` so the tap-press `transform` still works */
-.node.current::after { content: ''; position: absolute; inset: -13px; border: 5px dashed #fff; border-radius: 50%; filter: drop-shadow(0 0 1.5px rgba(0,0,0,.55)); animation: spin 6s linear infinite; pointer-events: none }
-/* white ripple that grows out of the halo and fades: the "tap me" signal (was a green glow, lost on green grass) */
-.node.current::before { content: ''; position: absolute; inset: -13px; border: 4px solid #fff; border-radius: 50%; animation: ripple 1.6s ease-out infinite; pointer-events: none }
+/* spinning dashed halo + white ripple around the current tile; `scale`/`rotate` so the tap-press `transform` still works */
+.node.current::after { content: ''; position: absolute; inset: -16px; border: 5px dashed #fff; border-radius: 50%; filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, .55)); animation: spin 6s linear infinite; pointer-events: none }
+.node.current::before { content: ''; position: absolute; inset: -16px; border: 4px solid #fff; border-radius: 50%; animation: ripple 1.6s ease-out infinite; pointer-events: none }
 @keyframes ripple { from { scale: 1; opacity: .9 } to { scale: 1.45; opacity: 0 } }
 @keyframes breathe { 50% { scale: 1.07 } }
 @keyframes spin { to { rotate: 360deg } }
+.nstars { position: absolute; left: 50%; top: calc(100% + 10px); translate: -50% 0; display: flex; gap: 2px; padding: 3px 8px; border-radius: 999px; background: #fff; box-shadow: 0 3px 0 rgba(0, 0, 0, .12); font-size: 15px; line-height: 1; pointer-events: none }
+.nstars i { font-style: normal; color: #e3d9c4 } .nstars i.on { color: var(--sun); text-shadow: 0 1px 0 var(--sun-d) }
+.jump { position: fixed; z-index: 4; right: max(16px, calc(50% - 244px)); bottom: calc(92px + env(safe-area-inset-bottom)); width: 52px; height: 52px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--card); box-shadow: var(--lift); font-size: 24px; cursor: pointer }
 
-.btn { border: 0; border-radius: 16px; padding: 14px 24px; font-weight: 900; letter-spacing: .5px; text-transform: uppercase; color: var(--btn-text); background: var(--green); box-shadow: 0 4px 0 var(--green-d); cursor: pointer }
-.btn.red { background: var(--red); color: #fff; box-shadow: 0 4px 0 var(--red-d) }
-.btn:disabled { background: var(--dis); color: var(--dis-t); box-shadow: 0 4px 0 var(--lock-d); cursor: not-allowed }
-.btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.2) }
-.btn.alt { background: none; color: var(--green); border: 2px solid var(--green); box-shadow: 0 4px 0 var(--line) }
-.back { border: 0; background: none; color: var(--blue); font-weight: 900; font-size: 16px; min-height: 44px; padding: 12px 12px 0 0; cursor: pointer }
-.row:disabled { opacity: .5; cursor: not-allowed }
-.btn.big { width: 100%; padding: 16px }
+/* ---------- lists: white rows, library tiles ---------- */
+.row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 10px 16px; margin-bottom: 12px; background: var(--card); border: 0; border-radius: 20px; box-shadow: var(--lift); text-align: left }
+button.row { cursor: pointer } button.row:active:not(:disabled) { transform: translateY(2px) }
+.row:disabled { opacity: .55; cursor: not-allowed }
+.row .rank { width: 26px; text-align: center; font-family: var(--display); font-weight: 600; color: var(--muted) }
+.row .rank.up { color: var(--lime-t) } .row .rank.down { color: var(--berry) }
+.row .chev { color: var(--muted); font-size: 20px }
+.row .emo { width: 42px; height: 42px; flex: none; display: grid; place-items: center; border-radius: 14px; background: var(--soft); font-size: 24px }
+.row.me { background: var(--sky-l); box-shadow: 0 0 0 2px var(--sky), 0 4px 0 var(--sky-d) }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+.tile { display: flex; flex-direction: column; gap: 2px; padding: 8px 8px 12px; border: 0; border-radius: 24px; background: var(--card); box-shadow: var(--lift); text-align: center; cursor: pointer }
+.tile:active { transform: translateY(2px) }
+.tile .art { display: grid; place-items: center; aspect-ratio: 4 / 3; margin-bottom: 8px; border-radius: 18px; color: #fff; font-size: 56px; background: radial-gradient(circle at 85% 12%, rgba(255, 255, 255, .25) 0 22%, transparent 23%), var(--c) }
+.tile b { font-family: var(--display); font-weight: 600; font-size: 16px; line-height: 1.15 }
+.tile small { color: var(--muted); font-size: 13px }
 
-.lesson { display: flex; flex-direction: column }
-.lbar { display: flex; align-items: center; gap: 14px; padding: 26px 16px 18px }
-.x { display: grid; place-items: center; width: 44px; height: 44px; margin: -10px; padding: 0; background: none; border: 0; border-radius: 12px; font-size: 26px; color: var(--muted); cursor: pointer }
-.pwrap { position: relative; flex: 1 }
-.combo { position: absolute; top: -18px; left: 2px; font-size: 11px; letter-spacing: 1px; color: var(--green); animation: pop .25s ease-out }
-.progress { height: 16px; background: var(--line); border-radius: 8px; overflow: hidden }
-.progress i { position: relative; display: block; height: 100%; background: var(--green); border-radius: 8px; transition: width .4s cubic-bezier(.3,1.4,.5,1) }
-.progress i::after { content: ''; position: absolute; left: 8px; right: 8px; top: 3px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.35) } /* the glossy highlight */
-.hearts { color: var(--red); font-weight: 900; font-size: 14px; white-space: nowrap } .hearts .time { color: var(--muted); margin-right: 8px }
-.qbody { flex: 1; padding: 16px; text-align: center }
-.qbody h2 { font-size: 26px; margin: 8px 0 }
-.visual { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .3em; font-size: 40px; line-height: 1.3; margin: 16px 0 }
-.visual span { max-width: 100%; word-break: break-all } /* a group only breaks if it alone is wider than the screen */
-.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px }
-.opt { padding: 22px 8px; font-size: 22px; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; cursor: pointer; animation: pop .3s ease-out backwards }
-.opt:nth-child(2) { animation-delay: .05s } .opt:nth-child(3) { animation-delay: .1s } .opt:nth-child(4) { animation-delay: .15s }
-.opt:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 2px; margin-bottom: 2px }
-.opt.sel { border-color: var(--blue-b); background: var(--blue-l); color: var(--blue) }
-.opt.sel.ok { border-color: var(--green); background: var(--ok-bg); color: var(--ok-t) }
-.opt.sel.bad { border-color: var(--red); background: var(--bad-bg); color: var(--bad-t); animation: shake .35s }
-.ans { width: 100%; margin-top: 24px; padding: 18px; font-size: 24px; text-align: center; background: var(--card); border: 2px solid var(--line); border-radius: 16px }
-/* feedback sheet slides up from the bottom */
-.foot { padding: 16px; border-top: 2px solid var(--line) }
-.foot.ok, .foot.bad { animation: slideUp .25s ease-out }
-.foot.ok { background: var(--ok-bg); color: var(--ok-t) } .foot.bad { background: var(--bad-bg); color: var(--bad-t) }
-.msg { font-size: 20px; font-weight: 900; margin-bottom: 12px; text-align: left }
+/* ---------- league ---------- */
+.tier { text-align: center; margin: 12px 0 18px; padding: 20px 16px; border-radius: 26px; background: var(--sun-l); box-shadow: 0 4px 0 #f1dc9a }
+.tier span { display: inline-grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; background: var(--card); font-size: 50px; box-shadow: 0 4px 0 var(--edge); animation: bob 2s ease-in-out infinite }
+.tier h2 { margin: 10px 0 4px; font-size: 24px } .tier small { color: var(--sun-t); font-weight: 700 }
+.zone { width: fit-content; margin: 8px auto 12px; padding: 4px 14px; border-radius: 999px; font-size: 13px; font-weight: 800; background: var(--lime-l); color: var(--lime-t) }
+.zone.bad { background: var(--berry-l); color: var(--berry-t) }
 
-.end { align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px }
-.end > * { animation: pop .4s ease-out backwards } .end > :nth-child(2) { animation-delay: .1s } .end > :nth-child(3) { animation-delay: .2s } .end > :nth-child(4) { animation-delay: .3s }
-.end h1 { margin: 0 0 8px; color: var(--sun-t) }
-.huge { font-size: 96px }
-.boxes { display: flex; gap: 10px; width: 100% }
-.box { flex: 1; border: 2px solid; border-radius: 16px; overflow: hidden; background: var(--card) }
-.box small { display: block; padding: 4px 0; color: #fff; font-size: 11px; letter-spacing: 1px }
-.box b { display: block; padding: 12px 4px; font-size: 20px }
-.box.xp { border-color: var(--sun-b) } .box.xp small { background: var(--sun-b); color: #7a5b00 }
-.box.st { border-color: var(--blue-b) } .box.st small { background: var(--blue-b); color: #0b4a68 }
-.box.tm { border-color: var(--green) } .box.tm small { background: var(--green); color: var(--btn-text) }
-.fine { margin: 4px 0 16px; color: var(--muted); font-size: 14px }
-.flame { font-size: 120px; animation: flicker 1.2s ease-in-out infinite !important }
-.bignum { font-size: 80px; font-weight: 900; color: var(--orange); line-height: 1 }
-
-.pick { width: 100%; padding: 12px; border: 2px solid var(--line); border-radius: 16px; background: var(--card) }
-.row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 12px 14px; margin-bottom: 10px; background: var(--card); border: 2px solid var(--line); border-radius: 16px; text-align: left }
-button.row { cursor: pointer } .row .rank { width: 24px; text-align: center } .row .chev { color: var(--muted); font-size: 20px }
-.row.me { background: var(--blue-l); border-color: var(--blue-b) }
-.row .emo { font-size: 28px } .grow { flex: 1 }
-.row select { border: 0; background: none; font-weight: 900; text-align: right }
-.row select option { color: #111 }
-.profile { text-align: center; padding-top: 16px } .profile .row { text-align: left } .profile .btn { margin-top: 16px }
+/* ---------- profile ---------- */
+.profile { text-align: center; padding-top: 16px }
+.profile h2 { font-size: 26px; margin-top: 14px } .profile h2 ~ h2 { font-size: 20px }
+.profile .btn { margin-top: 16px }
 /* photo-card avatar: big rounded square with a warm studio backdrop, character standing at the bottom edge */
-.pavatar { position: relative; overflow: hidden; height: 240px; display: flex; align-items: flex-end; justify-content: center; border-radius: 32px; background: radial-gradient(circle at 50% 35%, #c98a5a, #7a4a2c 75%); box-shadow: 0 10px 24px rgba(0,0,0,.25) }
-.pavatar span { font-size: 190px; line-height: .85; filter: drop-shadow(0 8px 12px rgba(0,0,0,.35)) }
-.profile h2 { font-size: 24px; margin-top: 14px }
-/* class picker: chunky card like the chips/options; opens an in-app grid of class buttons */
-.picker { position: relative; display: flex; width: 100%; align-items: center; gap: 12px; padding: 10px 14px; text-align: left; background: var(--card); border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 18px; font-size: 22px; color: var(--muted); cursor: pointer }
-.picker:active { transform: translateY(2px); border-bottom-width: 3px; margin-bottom: 2px }
-.picker.open, .picker:focus-visible { border-color: var(--blue-b); outline: 0 }
+.pavatar { position: relative; overflow: hidden; height: 240px; display: flex; align-items: flex-end; justify-content: center; border-radius: 32px; background: radial-gradient(circle at 50% 35%, #c98a5a, #7a4a2c 75%); box-shadow: 0 6px 0 #5e3820, 0 14px 28px rgba(30, 37, 73, .18) }
+.pavatar span { font-size: 190px; line-height: .85; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .35)) }
+.picker { position: relative; display: flex; width: 100%; align-items: center; gap: 12px; padding: 10px 16px 10px 10px; text-align: left; border: 0; background: var(--card); border-radius: 22px; box-shadow: var(--lift); font-size: 22px; color: var(--muted); cursor: pointer }
+.picker:active { transform: translateY(2px) }
+.picker.open, .picker:focus-visible { outline: 0; box-shadow: 0 0 0 3px var(--sky), 0 4px 0 var(--edge) }
 .picker .chev { transition: rotate .2s } .picker.open .chev { rotate: 180deg }
+.picker .pic { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 15px; background: var(--sky-l); color: var(--sky-t); font-size: 26px }
+.picker small { display: block; font-size: 12px; color: var(--muted) } .picker b { font-family: var(--display); font-weight: 600; font-size: 19px; color: var(--text) }
 /* dropdown panel floats over the page; the transparent scrim catches outside taps */
 .dd { position: relative; z-index: 3 }
 .dd-scrim { position: fixed; inset: 0; z-index: 0 }
-.dd-menu { position: absolute; z-index: 1; top: calc(100% + 8px); left: 0; right: 0; max-height: 300px; overflow-y: auto; margin: 0; padding: 6px; list-style: none; text-align: left; background: var(--card); border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 18px; box-shadow: 0 12px 28px rgba(0,0,0,.3); animation: drop .15s ease-out }
-.dd-menu button { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 14px; border: 2px solid transparent; border-radius: 12px; background: none; font-size: 16px; text-align: left; cursor: pointer }
-.dd-menu button:hover, .dd-menu button:focus-visible { background: var(--lock); outline: 0 }
-.dd-menu [aria-selected=true] button { background: var(--blue-l); border-color: var(--blue-b); color: var(--blue) }
+.dd-menu { position: absolute; z-index: 1; top: calc(100% + 10px); left: 0; right: 0; max-height: 300px; overflow-y: auto; margin: 0; padding: 6px; list-style: none; text-align: left; background: var(--card); border-radius: 22px; box-shadow: 0 4px 0 var(--edge), 0 18px 36px rgba(30, 37, 73, .2); animation: drop .15s ease-out }
+.dd-menu button { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 14px; border: 0; border-radius: 14px; background: none; font-size: 16px; text-align: left; cursor: pointer }
+.dd-menu button:hover, .dd-menu button:focus-visible { background: var(--soft); outline: 0 }
+.dd-menu [aria-selected=true] button { background: var(--sky-l); color: var(--sky-t) }
 .dd-menu .i { font-size: 20px }
 @keyframes drop { from { opacity: 0; translate: 0 -6px } }
-.picker .pic { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; background: var(--blue-l); color: var(--blue); font-size: 26px }
-.picker small { display: block; font-size: 12px; font-weight: 700; color: var(--muted) } .picker b { font-size: 18px; color: var(--text) }
-.profile h2 ~ h2 { font-size: 18px }
-/* profile stat cards: bright card, white title, pill button, big emoji peeking in from the right */
-.pcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0 }
-.pcard { position: relative; overflow: hidden; min-width: 0; padding: 12px 10px 40px; border-radius: 16px; text-align: left; color: #fff; background: radial-gradient(circle at 85% 30%, rgba(255,255,255,.22) 0 30%, transparent 31%), radial-gradient(circle at 10% 110%, rgba(0,0,0,.08) 0 25%, transparent 26%) var(--c) }
-.pcard.fire { --c: var(--orange) } .pcard.zap { --c: #58cc02 } .pcard.cup { --c: #1cb0f6 }
-.pcard h3 { margin: 0; font-size: 20px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .pcard p { margin: 0; font-size: 12px; font-weight: 700; opacity: .95 }
+.pcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 }
+.pcard { position: relative; overflow: hidden; min-width: 0; padding: 12px 10px 40px; border-radius: 20px; text-align: left; color: #fff; background: radial-gradient(circle at 85% 30%, rgba(255, 255, 255, .22) 0 30%, transparent 31%), radial-gradient(circle at 10% 110%, rgba(0, 0, 0, .08) 0 25%, transparent 26%) var(--c); box-shadow: 0 4px 0 var(--cd) }
+.pcard.fire { --c: var(--tang); --cd: var(--tang-d) } .pcard.zap { --c: var(--grape); --cd: var(--grape-d) } .pcard.cup { --c: var(--sky); --cd: var(--sky-d) }
+.pcard h3 { margin: 0; font-size: 21px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap } .pcard p { margin: 0; font-size: 12px; opacity: .95 }
 .pcard span { position: absolute; right: -2px; bottom: -8px; font-size: 48px; line-height: 1; transform: rotate(-8deg); pointer-events: none }
+.pcard .i { stroke-width: 2.4 }
+/* achievement stickers: white die-cut edge from stacked drop-shadows, slight tilt; one row, swipe sideways */
+.stickers { display: flex; gap: 14px; overflow-x: auto; margin: 0 -16px; padding: 10px 16px 14px; scroll-snap-type: x proximity; scrollbar-width: none }
+.stickers::-webkit-scrollbar { display: none }
+.sticker { flex: none; scroll-snap-align: start; border: 0; background: none; padding: 4px; cursor: pointer; transition: transform .15s }
+.sticker span { display: block; font-size: 52px; line-height: 1; filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 4px rgba(0, 0, 0, .25)) }
+.sticker:nth-child(odd) { transform: rotate(-7deg) } .sticker:nth-child(even) { transform: rotate(6deg) }
+.sticker:active { transform: scale(.9) }
+.sticker:not(.on) span { filter: grayscale(1); opacity: .3 }
 
-.tabs { position: fixed; z-index: 4; bottom: calc(10px + env(safe-area-inset-bottom)); left: 12px; right: 12px; max-width: 496px; margin: 0 auto; display: flex; padding: 8px 6px; background: var(--card); border: 2px solid var(--line); border-radius: 28px; box-shadow: 0 8px 24px rgba(0,0,0,.12) }
-.tabs button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--muted) }
-.tabs button span { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; font-size: 26px; color: var(--text); transition: transform .15s, background .15s }
-.tabs button small { font-size: 12px; font-weight: 800 }
-/* selected tab: a lifted paper disc, lit from the top with a soft shadow under it */
-.tabs button.on { color: var(--orange) }
-.tabs button.on span { color: #3d2200; transform: translateY(-2px); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.045' numOctaves='3' seed='7'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='4'%3E%3CfeDistantLight azimuth='225' elevation='50'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23p)'/%3E%3C/svg%3E") center/cover, linear-gradient(160deg, #ffd59a, #ffa62b 75%); background-blend-mode: multiply; box-shadow: inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 0 rgba(0,0,0,.12), 0 4px 8px rgba(255,150,0,.45) }
+/* ---------- lesson: question in a speech bubble, chunky answer tiles ---------- */
+.lesson { display: flex; flex-direction: column; background: var(--bg) }
+.lbar { display: flex; align-items: center; gap: 12px; padding: 18px 16px 12px }
+.pwrap { position: relative; flex: 1 }
+.combo { position: absolute; top: -22px; left: 0; padding: 1px 8px; border-radius: 999px; background: var(--berry); color: #fff; font-size: 11px; letter-spacing: 1px; animation: pop .25s ease-out }
+.progress { height: 18px; background: var(--line); border-radius: 9px; overflow: hidden }
+.progress i { position: relative; display: block; height: 100%; background: var(--lime); border-radius: 9px; transition: width .4s cubic-bezier(.3, 1.4, .5, 1) }
+.progress i::after { content: ''; position: absolute; left: 8px; right: 8px; top: 4px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .4) } /* glossy highlight */
+.hearts { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 999px; background: var(--card); box-shadow: 0 3px 0 var(--edge); color: var(--red); font-family: var(--display); font-weight: 600; font-size: 15px; white-space: nowrap }
+.hearts .time { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; color: var(--muted) }
+.hearts.hit { animation: shake .35s }
+.qbody { flex: 1; padding: 12px 16px; text-align: center }
+.qbody h2 { position: relative; display: inline-block; max-width: 100%; margin: 10px 0 8px; padding: 14px 20px; font-size: 24px; line-height: 1.25; background: var(--card); border-radius: 22px; box-shadow: var(--lift) }
+.qbody h2::after { content: ''; position: absolute; left: 50%; bottom: -8px; width: 18px; height: 18px; margin-left: -9px; background: var(--card); border-radius: 0 0 5px 0; transform: rotate(45deg) }
+.visual { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .3em; font-size: 40px; line-height: 1.3; margin: 18px 0 }
+.visual span { max-width: 100%; word-break: break-all } /* a group only breaks if it alone is wider than the screen */
+.visual.pop { font-size: 56px; text-align: center; animation: popIn .6s ease-out both }
+.explain { font-size: 18px; line-height: 1.5; text-align: center; margin: 12px 0 }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px }
+.opt { position: relative; padding: 22px 8px; font-family: var(--display); font-weight: 600; font-size: 24px; background: var(--card); border: 3px solid transparent; border-radius: 22px; box-shadow: 0 5px 0 var(--edge); cursor: pointer; animation: pop .3s ease-out backwards }
+.opt:nth-child(2) { animation-delay: .05s } .opt:nth-child(3) { animation-delay: .1s } .opt:nth-child(4) { animation-delay: .15s }
+.opt:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 var(--edge) }
+.opt.sel { border-color: var(--sky); background: var(--sky-l); color: var(--sky-t); box-shadow: 0 5px 0 var(--sky-d) }
+.opt.sel.ok { border-color: var(--lime-d); background: var(--lime); color: var(--ink); box-shadow: 0 5px 0 var(--lime-d) }
+.opt.sel.bad { border-color: var(--berry); background: var(--berry-l); color: var(--berry-t); box-shadow: 0 5px 0 var(--berry); animation: shake .35s }
+.ans { width: 100%; margin-top: 24px; padding: 18px; font-family: var(--display); font-size: 26px; text-align: center; background: var(--card); border: 3px solid transparent; border-radius: 22px; box-shadow: 0 5px 0 var(--edge) }
+.ans:focus { outline: 0; border-color: var(--sky) }
+/* feedback sheet slides up from the bottom */
+.foot { padding: 16px }
+.foot.ok, .foot.bad { border-radius: 28px 28px 0 0; animation: slideUp .25s ease-out }
+.foot.ok { background: var(--lime-l); color: var(--lime-t) } .foot.bad { background: var(--berry-l); color: var(--berry-t) }
+.msg { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-family: var(--display); font-size: 22px; font-weight: 600 }
+/* lesson end: sunny reward screen */
+.end { align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center; background: radial-gradient(circle at 50% 28%, #ffe27a, var(--sun) 65%) }
+.end.bad { background: var(--bg) }
+.end > * { animation: pop .4s ease-out backwards } .end > :nth-child(2) { animation-delay: .1s } .end > :nth-child(3) { animation-delay: .2s } .end > :nth-child(4) { animation-delay: .3s }
+.end h1 { margin: 0 0 6px; font-size: 36px }
+.end .fine { color: #7d6114 }
+.huge { position: relative; font-size: 110px; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .15)) }
+.boxes { display: flex; gap: 10px; width: 100% }
+.box { flex: 1; padding: 10px 4px 12px; border-radius: 20px; background: var(--card); box-shadow: 0 4px 0 rgba(0, 0, 0, .08) }
+.box small { display: block; font-size: 11px; letter-spacing: 1px; color: var(--muted) }
+.box b { display: flex; justify-content: center; align-items: center; gap: 4px; margin-top: 2px; font-family: var(--display); font-weight: 600; font-size: 22px }
 
-.daily { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 16px; padding: 16px; text-align: left; background: var(--sun-l); border: 2px solid var(--sun-b); border-bottom-width: 4px; border-radius: 16px; cursor: pointer }
-.daily small { color: var(--sun-t) } .go { color: var(--btn-text); background: var(--green); padding: 8px 14px; border-radius: 12px; font-weight: 900; letter-spacing: .5px; box-shadow: 0 3px 0 var(--green-d) }
+/* ---------- full-screen pages: streak, hearts, badge, chest ---------- */
+.splash { position: relative; min-height: 100dvh; max-width: 520px; margin: 0 auto; padding: 68px 20px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center }
+.splash .close { position: absolute; top: 14px; left: 14px }
+.bubble { position: relative; margin-bottom: 18px; padding: 16px 20px; border-radius: 22px; background: var(--card); box-shadow: var(--lift); font-size: 18px; line-height: 1.45 }
+.bubble::after { content: ""; position: absolute; left: 50%; bottom: -8px; width: 18px; height: 18px; margin-left: -9px; background: var(--card); border-radius: 0 0 5px 0; transform: rotate(45deg) }
+.hero { font-size: 140px; line-height: 1 } .hero.dim { filter: grayscale(1); opacity: .45 }
+.splash .num { font-family: var(--display); font-size: 56px; font-weight: 700; line-height: 1.05; color: var(--tang) }
+.splash .cap { font-family: var(--display); font-size: 22px; font-weight: 600; color: var(--tang-t) }
+.splash .btn { margin-top: auto }
+.flame { font-size: 120px; animation: flicker 1.2s ease-in-out infinite !important }
+.heartrow { display: flex; gap: 8px; font-size: 32px } .heartrow .off { filter: grayscale(1); opacity: .35 }
+.week { display: flex; gap: 8px; width: 100%; justify-content: space-between; margin: 24px 0 8px }
+.week div { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 8px }
+.week small { font-family: var(--display); font-weight: 600; color: var(--muted) } .week .today small { color: var(--tang-t) }
+.week i { width: 100%; max-width: 44px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: var(--card); box-shadow: 0 3px 0 var(--edge); font-style: normal; font-size: 20px; color: #fff }
+.week i .i { stroke-width: 3 } .week i.on { background: var(--tang); box-shadow: 0 3px 0 var(--tang-d) }
+.week .today i.on { animation: stamp .45s .35s cubic-bezier(.3, 1.6, .5, 1) backwards }
+.wiggle, .chest { display: inline-block }
+.chest { position: relative }
+.wiggle, .chest.shut { animation: wiggle 1.2s ease-in-out infinite; cursor: pointer }
+.chest.open { animation: pop .5s ease-out }
 
+/* ---------- login: sky with clouds, owl, cream sheet ---------- */
+.login { min-height: 100dvh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; background: radial-gradient(ellipse 64px 24px at 16% 12%, #fff 96%, transparent), radial-gradient(ellipse 44px 18px at 25% 9%, #fff 96%, transparent), radial-gradient(ellipse 80px 28px at 84% 22%, #fff 96%, transparent), radial-gradient(ellipse 50px 20px at 74% 19%, #fff 96%, transparent), linear-gradient(#62c3ff, #c4ebff 75%) }
+.login .top { flex: 1; display: grid; place-items: center; padding: 40px 24px 0 }
+.login .mascot { width: min(300px, 80vw); animation: bob 2.4s ease-in-out infinite }
+.login .sheet { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 32px 20px 28px; text-align: center; background: var(--bg); border-radius: 48px 48px 0 0 }
+.login .sheet::before { content: ""; position: absolute; inset: -18px 12% auto; height: 40px; border-radius: 50%; background: var(--bg) }
+.login small { position: relative; align-self: center; padding: 4px 12px; border-radius: 999px; background: var(--sky-l); color: var(--sky-t); font-size: 13px }
+.login h1 { margin: 0; font-size: 30px; line-height: 1.15 }
+.login p { margin: 0 0 8px; color: var(--muted) }
+.btn.social { font-size: 17px }
+.btn.google { background: var(--card); color: #3c4043; box-shadow: 0 5px 0 var(--edge) }
+.btn.fb { background: #1877f2; color: #fff; box-shadow: 0 5px 0 #0f5bbf }
+
+/* ---------- motion ---------- */
+/* sparkle burst: bits fly out from the parent's centre (correct answer, end screens, chest) */
+.burst { position: absolute; left: 50%; top: 50%; pointer-events: none; --d: -56px }
+.burst.loop { --d: -110px }
+.burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 2px; background: var(--lime); animation: burst .6s ease-out both }
+.burst i:nth-child(4n+1) { background: var(--sun) } .burst i:nth-child(4n+2) { background: var(--sky); border-radius: 50% } .burst i:nth-child(4n+3) { background: var(--berry); border-radius: 50% }
+.burst.loop i { animation-duration: 1.6s; animation-iteration-count: infinite; animation-delay: calc(var(--i) * .16s) }
+main > * { animation: fadeIn .25s ease-out backwards } /* each tab fades in when you switch */
+@keyframes burst { 0% { transform: rotate(var(--a)) translateY(0) scale(1); opacity: 0 } 15% { opacity: 1 } 100% { transform: rotate(var(--a)) translateY(var(--d)) scale(.3); opacity: 0 } }
 @keyframes pop { from { transform: scale(.85); opacity: 0 } 70% { transform: scale(1.04) } }
+@keyframes popIn { 0% { transform: scale(.4); opacity: 0 } 70% { transform: scale(1.12) } 100% { transform: scale(1); opacity: 1 } }
 @keyframes slideUp { from { transform: translateY(100%) } }
 @keyframes shake { 20% { transform: translateX(-6px) } 40% { transform: translateX(6px) } 60% { transform: translateX(-4px) } 80% { transform: translateX(4px) } }
 @keyframes bob { 50% { transform: translateY(-5px) } }
 @keyframes flicker { 0%, 100% { transform: scale(1) rotate(-3deg) } 50% { transform: scale(1.08) rotate(3deg) } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important } }
-.explain { font-size: 18px; line-height: 1.5; text-align: center; margin: 8px 0 }
-.visual.pop { font-size: 56px; text-align: center; animation: popIn .6s ease-out both }
-@keyframes popIn { 0% { transform: scale(.4); opacity: 0 } 70% { transform: scale(1.12) } 100% { transform: scale(1); opacity: 1 } }
-.tier { text-align: center; margin: 16px 0 }
-.tier span { font-size: 56px } .tier h2 { margin: 4px 0 } .tier small { color: var(--muted); font-weight: 700 }
-.zone { text-align: center; font-weight: 900; font-size: 13px; color: var(--ok-t); margin: 6px 0 }
-.zone.bad { color: var(--bad-t) }
-.row .up { color: var(--ok-t); font-weight: 900 } .row .down { color: var(--bad-t); font-weight: 900 }
-/* achievement stickers: no frame, white die-cut edge from stacked drop-shadows, slight tilt */
-/* one row, swipe sideways; bleeds to the screen edge, vertical padding keeps tilted stickers from being clipped */
-.stickers { display: flex; gap: 14px; overflow-x: auto; margin: 0 -16px; padding: 10px 16px 14px; scroll-snap-type: x proximity; scrollbar-width: none }
-.stickers::-webkit-scrollbar { display: none }
-.sticker { flex: none; scroll-snap-align: start }
-.sticker { border: 0; background: none; padding: 4px; cursor: pointer; transition: transform .15s }
-.sticker span { display: block; font-size: 52px; line-height: 1; filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 4px rgba(0,0,0,.3)) }
-.sticker:nth-child(odd) { transform: rotate(-7deg) } .sticker:nth-child(even) { transform: rotate(6deg) }
-.sticker:active { transform: scale(.9) }
-.sticker:not(.on) span { filter: grayscale(1) brightness(.7); opacity: .35 }
-.splash { min-height: 100dvh; max-width: 520px; margin: 0 auto; padding: 56px 20px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px }
-.bubble { position: relative; padding: 18px 20px; border: 2px solid var(--line); border-radius: 16px; font-size: 18px; line-height: 1.5; margin-bottom: 18px }
-.bubble::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 16px; height: 16px; background: var(--bg); border: solid var(--line); border-width: 0 2px 2px 0; transform: translateX(-50%) rotate(45deg) }
-.hero { font-size: 140px; line-height: 1 } .hero.dim { filter: grayscale(1); opacity: .45 }
-.splash .num { font-size: 56px; font-weight: 900; color: var(--orange); line-height: 1.05 }
-.splash .cap { font-size: 22px; font-weight: 900; color: var(--orange) }
-.splash .btn { margin-top: auto }
-.week { display: flex; gap: 8px; width: 100%; justify-content: space-between; margin: 24px 0 8px }
-.week div { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1 } .week small { font-weight: 900; color: var(--muted) } .week .today small { color: var(--orange) }
-.week i { width: 100%; max-width: 44px; aspect-ratio: 1; border-radius: 50%; background: var(--lock); display: grid; place-items: center; font-style: normal; font-size: 20px; color: #fff } .week i .i { stroke-width: 3 } .week i.on { background: var(--orange) }
-
-/* --- motion pass inspired by the Duolingo recording --- */
-/* sparkle burst: bits fly out from the parent's centre (correct answer, end screens, chest) */
-.opt, .huge, .chest { position: relative }
-.burst { position: absolute; left: 50%; top: 50%; pointer-events: none; --d: -56px }
-.burst.loop { --d: -110px }
-.burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 2px; background: var(--green); animation: burst .6s ease-out both }
-.burst i:nth-child(3n+1) { background: #ffc800 } .burst i:nth-child(3n+2) { background: #1cb0f6; border-radius: 50% }
-.burst.loop i { animation-duration: 1.6s; animation-iteration-count: infinite; animation-delay: calc(var(--i) * .16s) }
-@keyframes burst { 0% { transform: rotate(var(--a)) translateY(0) scale(1); opacity: 0 } 15% { opacity: 1 } 100% { transform: rotate(var(--a)) translateY(var(--d)) scale(.3); opacity: 0 } }
-/* heart counter shakes when you lose one */
-.hearts.hit { display: inline-block; animation: shake .35s }
-/* each tab fades in when you switch */
-main > * { animation: fadeIn .25s ease-out backwards }
 @keyframes fadeIn { from { opacity: 0 } }
-/* today's streak check stamps in */
-.week .today i.on { animation: stamp .45s .35s cubic-bezier(.3,1.6,.5,1) backwards }
 @keyframes stamp { from { transform: scale(2.4); opacity: 0 } }
-.tier span { display: inline-block; animation: bob 2s ease-in-out infinite }
-/* daily quest card + chest */
-.daily.quest { background: var(--card); border-color: var(--line) }
-.daily:disabled { cursor: default }
-.qbar { position: relative; display: block; height: 18px; margin-top: 6px; background: var(--line); border-radius: 9px; overflow: hidden }
-.qbar i { display: block; height: 100%; background: #ff86d0; border-radius: 9px; transition: width .6s cubic-bezier(.3,1.4,.5,1) }
-.qbar em { position: absolute; inset: 0; font-style: normal; font-size: 12px; line-height: 18px; text-align: center }
-.wiggle, .chest { display: inline-block }
-.wiggle, .chest.shut { animation: wiggle 1.2s ease-in-out infinite; cursor: pointer }
-.chest.open { animation: pop .5s ease-out }
 @keyframes wiggle { 0%, 55%, 100% { transform: rotate(0) } 65% { transform: rotate(-12deg) } 75% { transform: rotate(12deg) } 85% { transform: rotate(-6deg) } }
-/* floating "back to my lesson" button above the tab bar */
-.jump { position: fixed; z-index: 4; right: max(16px, calc(50% - 244px)); bottom: calc(84px + env(safe-area-inset-bottom)); width: 52px; height: 52px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px; background: var(--card); font-size: 24px; cursor: pointer }
-@media (prefers-reduced-motion: reduce) { .burst { display: none } }
-/* streak / hearts detail pages */
-.splash { position: relative } .splash .close { position: absolute; top: 12px; left: 12px; margin: 0 }
-.heartrow { display: flex; gap: 8px; font-size: 32px } .heartrow .off { filter: grayscale(1); opacity: .35 }
-/* best stars under each lesson node */
-.nstars { position: absolute; left: 50%; top: calc(100% + 8px); translate: -50% 0; display: flex; gap: 2px; padding: 3px 7px; border-radius: 10px; background: rgba(0,0,0,.4); font-size: 16px; line-height: 1; pointer-events: none }
-.nstars i { font-style: normal; color: rgba(255,255,255,.35) } .nstars i.on { color: #ffc800; text-shadow: 0 2px 0 #c99700 }
-/* dismissable quest card */
-.qwrap { position: relative } .qclose { position: absolute; top: 18px; right: 2px; margin: 0; font-size: 20px }
-/* reduce motion: nothing moves or grows, but the white ring still fades in and out so kids can find the current lesson */
-@media (prefers-reduced-motion: reduce) { .node.current::before { animation: fade 1.4s ease-in-out infinite !important; scale: 1.2 } }
 @keyframes fade { 50% { opacity: .1 } }
-/* Login: pink hero with mascot, white sheet with social buttons */
-.login { min-height: 100dvh; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; background: #f0607f }
-.login .top { flex: 1; display: grid; place-items: center; padding: 40px 24px 0 }
-.login .mascot { width: min(300px, 80vw); animation: bob 2.4s ease-in-out infinite }
-.login .sheet { position: relative; background: var(--bg); border-radius: 48px 48px 0 0; padding: 32px 20px 28px; text-align: center; display: flex; flex-direction: column; gap: 12px }
-.login .sheet::before { content: ""; position: absolute; inset: -18px 12% auto; height: 40px; border-radius: 50%; background: var(--bg) }
-.login small { font-size: 15px; color: var(--muted); position: relative }
-.login h1 { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 900 }
-.login p { margin: 0 0 8px; font-weight: 700; color: var(--muted) }
-.btn.social { display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: none; font-size: 17px }
-.btn.google { background: #fff; color: #3c4043; border: 2px solid var(--line); box-shadow: 0 4px 0 var(--line) }
-.btn.fb { background: #1877f2; color: #fff; box-shadow: 0 4px 0 #0f5bbf }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important }
+  .burst { display: none }
+  /* nothing moves or grows, but the white ring still fades in and out so kids can find the current lesson */
+  .node.current::before { animation: fade 1.4s ease-in-out infinite !important; scale: 1.2 }
+}

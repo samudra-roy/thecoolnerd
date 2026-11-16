@@ -134,7 +134,7 @@ export default function Lesson({ make, title, award, hearts, nextHeartMs, onWron
 
 export function End(p: { emoji: string; head: string; btn: string; onClick: () => void; bad?: boolean; children?: React.ReactNode }) {
   return (
-    <div className="lesson end">
+    <div className={`lesson end ${p.bad ? 'bad' : ''}`}>
       <div className="huge">{p.emoji}{!p.bad && <Burst loop />}</div>
       <h1>{p.head}</h1>
       {p.children}
